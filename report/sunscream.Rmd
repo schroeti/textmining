@@ -1,0 +1,18 @@
+---
+title: "Sunscream project"
+author: "Astrid Wiedmer, Charlotte Fleury, Rita Sefraoui Tahiri, Alexandre Schroeter"
+date: "24/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Webscrapping
+This part is dedicated to extracting the data we need. 
+```{r cars}
+library(dplyr)
+```
+
+
