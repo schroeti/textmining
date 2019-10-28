@@ -4,7 +4,7 @@ library(httr)
 library(tidyverse)
 library(rebus)
 library(lubridate)
-library(purrr)
+library(purrr) 
 
 laroche.html <- html("https://www.makeupalley.com/product/showreview.asp/ItemId=48043/Anthelios-Ultra-Light-Face-Sunscreen-SPF-60/La-Roche-Posay/Sunscreen")
 
