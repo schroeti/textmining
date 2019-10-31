@@ -33,7 +33,7 @@ get_data_from_json <- function(json_path){
   as.data.frame(data)
 }
 
-scrape_write_table <- function(number){
+mua_table <- function(number){
   
   # Read first page html
   first_page <- str_c("https://www.makeupalley.com/product/showreview.asp/ItemId=",number) %>%
@@ -59,7 +59,7 @@ scrape_write_table <- function(number){
     rename_at(vars(starts_with("getRecords.")), 
               funs(str_replace(., "getRecords.", ""))) %>%
     # Write a tab-separated file
-    write_csv(str_c("../data/product_",number,'.csv'))
+    write_csv(str_c(number,'.csv'))
 }
 
 #------------------------------------------------------------#
