@@ -66,4 +66,4 @@ mua_table <- function(number){
 
 #Example belowe
 num <- c(190019, 179415)
-lapply(num, scrape_write_table)
+lapply(num, scrape_write_table) 
