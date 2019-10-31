@@ -34,14 +34,14 @@ d10 <- reddit_content(URL="")
 
 d1_1 <- d1 %>%
   select(id, comment)
-d1[3:13, 2]
+d1[3:13, ]
 
 words <- d1 %>% unnest_tokens(word, comment, to_lower=TRUE)
 
 word.counts <- count(words, word, sort=TRUE)
 word.counts
 
-barplot(word.counts$n[1:10], main="Hallelujah word counts", horiz=TRUE,
+barplot(word.counts$n[1:10], main="d1 word counts", horiz=TRUE,
         names.arg=word.counts$word[1:10]) # simple barplot of the 10 most frequent words
 ggplot(word.counts[1:10,], aes(word,n)) + geom_col() + xlab(NULL) + coord_flip() # with ggplot
 
@@ -65,7 +65,7 @@ word.counts2
 
 
 #barplot
-barplot(word.counts2$n[1:10], main="Hallelujah word counts", horiz=TRUE,
+barplot(word.counts2$n[1:10], main="d2 word counts", horiz=TRUE,
         names.arg=word.counts2$word[1:10]) # simple barplot of the 10 most frequent words
 ggplot(word.counts2[1:10,], aes(word,n)) + geom_col() + xlab(NULL) + coord_flip() # with ggplot
 
