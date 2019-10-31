@@ -7,10 +7,6 @@ library(tibble)
 library(ggplot2)
 
 #extract the data from reddit
-d8 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/d5x4g0/11_sunscreens_for_sensitive_skin_at_low_price/")
-
-d7 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/dkppo4/sun_care_european_high_uva_sunscreens_for/")
-
 d1 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/craf60/selfie_after_a_long_time_of_search_i_have_finally/")
 
 d2 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/btx79r/sun_care_dermatologist_told_me_to_ditch_sunscreen/")
@@ -23,14 +19,13 @@ d5 <- reddit_content((URL="https://www.reddit.com/r/SkincareAddiction/comments/d
 
 d6 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/dcern5/review_the_10_sunscreens_ive_tried_in_my_hg/")
 
+d7 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/dkppo4/sun_care_european_high_uva_sunscreens_for/")
+
+d8 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/d5x4g0/11_sunscreens_for_sensitive_skin_at_low_price/")
+
 d9 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/df7l2i/review_barisun_50_uvauvb_and_anessa_50_pa/")
 
-d10 <- reddit_content(URL="")
-#possible pages-comments that I found:
-## https://www.reddit.com/r/SkincareAddiction/comments/craf60/selfie_after_a_long_time_of_search_i_have_finally/
-## https://www.reddit.com/r/SkincareAddiction/comments/btx79r/sun_care_dermatologist_told_me_to_ditch_sunscreen/
-## https://www.reddit.com/r/SkincareAddiction/comments/c7x8ke/product_question_30_minutes_after_applying/
-## https://www.reddit.com/r/SkincareAddiction/comments/c096h9/review_me_6_months_ago_sunscreen_is_so_greasy_and/
+#--------------------------------------------------------#
 
 d1_1 <- d1 %>%
   select(id, comment)
@@ -53,7 +48,7 @@ with(filter(word.counts), wordcloud(word, freq=n, max.words = 100))
 d2_2 <- d2 %>%
   select(id, comment)
 
-#encore ? travailler... stopword et tout
+#encore à travailler...
 library(tm)
 words2 <- d2_2 %>% unnest_tokens(word, comment, to_lower=TRUE)
 words2 <- as.tibble(words2)
