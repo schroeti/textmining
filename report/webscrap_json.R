@@ -33,7 +33,7 @@ get_data_from_json <- function(json_path){
   as.data.frame(data)
 }
 
-mua_table <- function(number){
+scrape_write_table <- function(number){
   
   # Read first page html
   first_page <- str_c("https://www.makeupalley.com/product/showreview.asp/ItemId=",number) %>%
@@ -66,4 +66,4 @@ mua_table <- function(number){
 
 #Example belowe
 num <- c(190019, 179415)
-lapply(num, scrape_write_table) 
+lapply(num, scrape_write_table)
