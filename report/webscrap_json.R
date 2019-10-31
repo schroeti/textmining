@@ -59,7 +59,7 @@ scrape_write_table <- function(number){
     rename_at(vars(starts_with("getRecords.")), 
               funs(str_replace(., "getRecords.", ""))) %>%
     # Write a tab-separated file
-    write_csv(str_c("../data/product_",number,'.csv'))
+    write_csv(str_c(number,'.csv'))
 }
 
 #------------------------------------------------------------#
