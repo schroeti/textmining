@@ -59,11 +59,12 @@ scrape_write_table <- function(number){
     rename_at(vars(starts_with("getRecords.")), 
               funs(str_replace(., "getRecords.", ""))) %>%
     # Write a tab-separated file
-    write_csv(str_c(number,'.csv'))
+    write_csv(str_c('data/',number,'.csv'))
 }
 
 #------------------------------------------------------------#
 
 #Example belowe
-num <- c(190019, 179415)
-lapply(num, scrape_write_table)
+items <- c(48043, 143906, 74107, 160671, 73469, 151181, 19626, 30275, 3123, 
+           76243, 195577, 164554)
+lapply(items, scrape_write_table)
