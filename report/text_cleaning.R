@@ -42,6 +42,12 @@ levels(sunscreen$productName) <- c(
 
 my_stop_words <- tibble(word = c("#", "s", "ve", "re", "skin", "sunscreen", "product"))
 
+sunscreen_nostopword <- sunscreen %>%
+  mutate(review2 = review) %>%
+  as.tibble() %>%
+  unnest_tokens(word, review)
+
+
 sunscreen_cleaned <- sunscreen %>%
   mutate(review2 = review) %>%
   as.tibble() %>%
@@ -117,7 +123,17 @@ amplitude <- sentiment_by_brand_pos %>%
   arrange(desc(ampl)) %>% 
   print()
 
-#number of words per review
+#number of words per review with stopwords
+sunscreen_nostopword %>% 
+  group_by(reviewId, rating) %>%
+  count() %>%
+  ggplot(aes(n, col = as.factor(rating))) +
+  geom_bar() +
+  facet_wrap(~rating)
+
+
+
+#number of words per review without stopwords
 sunscreen_cleaned %>% 
   group_by(reviewId, rating) %>%
   count() %>%
@@ -125,3 +141,13 @@ sunscreen_cleaned %>%
   geom_bar() +
   facet_wrap(~rating)
 
+
+
+#tf-idf
+tf <- sunscreen_cleaned %>%
+  group_by(reviewId) %>%
+  count(word) %>%
+  ungroup()
+
+tf %>%
+  bind_tf_idf(word, reviewId, n )
