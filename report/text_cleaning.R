@@ -13,7 +13,7 @@ library(ggwordcloud)
 library(RColorBrewer)
 library(ggforce)
 
-setwd("../data")
+setwd("./data")
 
 sunscreen <-
   list.files(pattern = "*.csv") %>% 
@@ -88,7 +88,7 @@ for(i in 1:3){
 sentiment_by_brand <- sunscreen_cleaned %>%
   inner_join(get_sentiments("bing"), by = "word") %>%
   group_by(productName, sentiment) %>%
-  count()
+  count() 
 
 plot_sentiment_page <- function(p){
   ggplot(sentiment_by_brand, aes(x = sentiment, y = n, fill = sentiment)) + 
@@ -104,6 +104,24 @@ for(i in 1:3){
     print()
 }
 
-  
+#largest amplitude of sentiments
+sentiment_by_brand_pos <- sentiment_by_brand %>% filter(sentiment == "positive")
+sentiment_by_brand_neg <- sentiment_by_brand %>% filter(sentiment == "negative")
 
+#substract number of negative words to number of positive words. 
+amplitude <- sentiment_by_brand_pos %>% 
+  inner_join(sentiment_by_brand_neg, by = "productName") %>%
+  mutate(ampl = n.x - n.y) %>%
+  ungroup() %>%
+  select(productName, ampl) %>%
+  arrange(desc(ampl)) %>% 
+  print()
+
+#number of words per review
+sunscreen_cleaned %>% 
+  group_by(reviewId, rating) %>%
+  count() %>%
+  ggplot(aes(n, col = as.factor(rating))) +
+  geom_bar() +
+  facet_wrap(~rating)
 
