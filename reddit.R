@@ -138,12 +138,15 @@ word.sent %>%
 #dfmat
 library(quanteda)
 
+n=1
+
 dd <- dtotal %>%
   select(title, comment)%>%
-  for each title in length(dtotal) {
-    if title[i]  
-    n = n+1
-    mutate(review = n)
+  for (title in dtotal) {
+    if (title[i] = title[i-1])
+    {mutate(review = n)}
+    else
+    {mutate(review = n+1)}
   }
 
 dfmat <- quanteda::dfm(dtotal$comment)
