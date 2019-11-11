@@ -25,47 +25,127 @@ d8 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/d5
 
 d9 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/df7l2i/review_barisun_50_uvauvb_and_anessa_50_pa/")
 
-#--------------------------------------------------------#
+dtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
+#-----------------------------------------------------------------------#
 
-d1_1 <- d1 %>%
-  select(id, comment)
-d1[3:13, ]
-
-words <- d1 %>% unnest_tokens(word, comment, to_lower=TRUE)
-
-word.counts <- count(words, word, sort=TRUE)
-word.counts
-
-barplot(word.counts$n[1:10], main="d1 word counts", horiz=TRUE,
-        names.arg=word.counts$word[1:10]) # simple barplot of the 10 most frequent words
-ggplot(word.counts[1:10,], aes(word,n)) + geom_col() + xlab(NULL) + coord_flip() # with ggplot
-
-library(wordcloud)
-with(filter(word.counts), wordcloud(word, freq=n, max.words = 100))
-
-####------------ same but with second dataset
-
-d2_2 <- d2 %>%
-  select(id, comment)
-
-#encore à travailler...
+## dtotal -- corpus
 library(tm)
-words2 <- d2_2 %>% unnest_tokens(word, comment, to_lower=TRUE)
-words2 <- as.tibble(words2)
-words2.cp <- VCorpus(VectorSource(words2$word))
-words2.cp <- tm_map(words2.cp, removeWords, stopwords("english"))
+dtotal <- tibble(text=dtotal$comment)
+dtot.tok <- dtotal%>% unnest_tokens(word, text, to_lower=TRUE)
+dtot.cp <- VCorpus(VectorSource(dtot.tok$word))
+dtot.cp <- tm_map(dtot.cp, removeWords, stopwords("english"))
+dtot.cp
 
-word.counts2 <- count(words2, word, sort=TRUE)
-word.counts2
+inspect(dtot.cp)
 
+#stemming + lemmatization
+dtot.cp <- tm_map(dtot.cp, stemDocument)
+library(lexicon)
+library(textstem)
+#install.packages("textstem")
+lemmatize_words(dtot.cp, dictionary=hash_lemmas)
 
-#barplot
-barplot(word.counts2$n[1:10], main="d2 word counts", horiz=TRUE,
-        names.arg=word.counts2$word[1:10]) # simple barplot of the 10 most frequent words
-ggplot(word.counts2[1:10,], aes(word,n)) + geom_col() + xlab(NULL) + coord_flip() # with ggplot
+#document term matrix
+dtot.dtm <- DocumentTermMatrix(dtot.cp)
 
-#wordcloud
+#Frequencies + plot
+dtot.fr <- colSums(as.matrix(dtot.dtm))
+dtot.fr
+dtot.df <- data.frame(word=names(dtot.fr), freq=dtot.fr)
+require(ggplot2)
+ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()
+
+#tot 50
+dtot.top50 <- top_n(dtot.df, n=50)
+dtot.top502 <- top_n(dtot.tok, n=50)
+dtot.top503 <- top_n(dtot.cp, n=50)
+
+#Cloud of words
 library(wordcloud)
-with(filter(word.counts2), wordcloud(word, freq=n, max.words = 100))
+dtot.counts <- count(dtot.top50, word, sort=T)
+with(dtot.counts, wordcloud(word, max.words = 100))
+
+dtot.counts <- count(dtot.top502, word, sort=T)
+with(dtot.counts, wordcloud(word, max.words = 100))
+
+dtot.counts <- count(dtot.top503, word, sort=T)
+with(dtot.counts, wordcloud(word, max.words = 100), margin(t=0, r=0, b=0, l=0, unit ="pt"))
+
+###----------------------------------sentiment analysis
+library(stringr)
+library(textdata)
+
+get_sentiments("bing")
+filter(get_sentiments("bing"), word %in% dtot.tok)
+
+get_sentiments("nrc")
+filter(get_sentiments("nrc"), word %in% dtot.tok)
+
+get_sentiments("afinn")
+filter(get_sentiments("afinn"), word %in% dtot.tok)
+
+get_sentiments("loughran")
+filter(get_sentiments("loughran"), word %in% dtot.tok)
+
+
+dtot.sentiment <- dtot.tok %>% right_join(get_sentiments("nrc")) %>%
+  count(sentiment, sort=T) #le meilleur
+
+dtot.sentiment <- dtot.tok %>% right_join(get_sentiments("bing")) %>%
+  count(sentiment, sort=T) # NUL
+
+dtot.sentiment <- dtot.tok %>% right_join(get_sentiments("loughran")) %>%
+  count(sentiment, sort=T)
+
+
+#plot sentiment
+ggplot(dtot.sentiment, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F)
+
+#word contributing to the sentiment
+word.sent <- inner_join(dtot.tok, get_sentiments(("nrc")))
+word.sent <- count(word.sent, word, sentiment, sort=T)
+word.sent %>%
+  top_n(n=10)%>%
+  ggplot(aes(reorder(word,n),n, fill=sentiment)) +
+  geom_bar(alpha=0.8, stat="identity")+
+  labs(y="Contribution to sentiment", x=NULL)+
+  coord_flip()
+
+#polarity score, sentiment par commentaire
+library(sentimentr)
+dtotal.pol <- sentiment_by(dtotal$comment)
+dtotal.pol
+
+get_sentiments("nrc")
+filter(get_sentiments("nrc"), word %in% dtotal$comment)
+
+dtotal.sent <- dtotal %>% right_join(get_sentiments("nrc"), by=NULL) %>%
+  count(sentiment, sort=T) #le meilleur
+
+?right_join
+
+word.sent <- inner_join(dtotal.sent, get_sentiments(("nrc")))
+word.sent <- count(dtotal.sent, comment, sentiment, sort=T)
+word.sent %>%
+  top_n(n=10)%>%
+  ggplot(aes(reorder(word,n),n, fill=sentiment)) +
+  geom_bar(alpha=0.8, stat="identity")+
+  labs(y="Contribution to sentiment", x=NULL)+
+  coord_flip()
+
+##-----------------------------------------SIMILARITIES
+
+#dfmat
+library(quanteda)
+
+dd <- dtotal %>%
+  select(title, comment)%>%
+  for each title in length(dtotal) {
+    if title[i]  
+    n = n+1
+    mutate(review = n)
+  }
+
+dfmat <- quanteda::dfm(dtotal$comment)
 
 
