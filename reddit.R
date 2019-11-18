@@ -142,7 +142,7 @@ word.sent %>%
 library(quanteda)
 
 #To know which review
-reviews <- data.frame(num_comments = c(83,450,320,363,8,116,35,155,10), review = c(1,2,3,4,5,6,7,8,9))
+reviews <- data.frame(num_comments = c(83,450,320,363,8,116,35,154,10), review = c(1,2,3,4,5,6,7,8,9))
 
 ddtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
@@ -330,15 +330,17 @@ dd9.df <- data.frame(word=names(dd9.fr), freq=dd9.fr)
 ggplot(top_n(dd9.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")
 
 
-a <- ggplot(top_n(dd1.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review1")+theme(legend.position = NULL)
-b <- ggplot(top_n(dd2.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review2")+theme(legend.position = NULL)
-c <- ggplot(top_n(dd3.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review3")+theme(legend.position = NULL)
-d <- ggplot(top_n(dd4.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review4")+theme(legend.position = NULL)
-e <- ggplot(top_n(dd5.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review5")+theme(legend.position = NULL)
-f <- ggplot(top_n(dd6.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review6")+theme(legend.position = NULL)
-g <- ggplot(top_n(dd7.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review7")+theme(legend.position = NULL)
-h <- ggplot(top_n(dd8.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review8")+theme(legend.position = NULL)
-i <- ggplot(top_n(dd9.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")+theme(legend.position = NULL)
+a <- ggplot(top_n(dd1.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review1")+theme(legend.position = "None")
+b <- ggplot(top_n(dd2.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review2")+theme(legend.position = "None")
+c <- ggplot(top_n(dd3.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review3")+theme(legend.position = "None")
+d <- ggplot(top_n(dd4.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review4")+theme(legend.position = "None")
+e <- ggplot(top_n(dd5.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review5")+theme(legend.position = "None")
+f <- ggplot(top_n(dd6.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review6")+theme(legend.position = "None")
+g <- ggplot(top_n(dd7.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review7")+theme(legend.position = "None")
+h <- ggplot(top_n(dd8.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review8")+theme(legend.position = "None")
+i <- ggplot(top_n(dd9.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")+theme(legend.position = "None")
+
+par(mfrow=c(3,3))
 
 library(cowplot)
 plot_grid(a,b,c,d,e,f,g,h,i, labels=c("1","2","3","4","5","6","7","8","9"), ncol = 3, nrow = 3)
@@ -357,47 +359,49 @@ d8.top50 <- top_n(dd8.df, n=50)
 d9.top50 <- top_n(dd9.df, n=50)
 
 
+
 library(wordcloud)
 d1.counts <- count(d1.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d1.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens"), vfont=c("serif","plain")))
 
 dt2.counts <- count(d2.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d2.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d3.counts <- count(d3.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d3.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d4.counts <- count(d4.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d4.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d5.counts <- count(d5.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d5.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d6.counts <- count(d6.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d6.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d7.counts <- count(d7.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d7.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d8.counts <- count(d8.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d8.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d9.counts <- count(d9.top50, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 10))
+with(d9.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 
 plot_grid(a,b,c,d,e,f,g,h,i, labels=c("1","2","3","4","5","6","7","8","9"), ncol = 3, nrow = 3)
 
 
-
-
 ##------------------------------------------- LSA
-## Running the LSA with quanteda
+## Running the LSA with quanteda #
 dtot.cp2 <- corpus(dtotal$comment)
 dfmat <- dfm(dtot.cp2, tolower = TRUE, remove = stopwords("english"), stem = FALSE, remove_punct = TRUE)
-tmod <- textmodel_lsa(dfmat, nd=58) # see also nd=58, 57, 10 etc.
+tmod <- textmodel_lsa(dfmat, nd=10) # see also nd=58, 57, 10 etc. --> nombre de noeuds, plus le noeud est faible plus les groupes sont gros --> gros clusters
 head(tmod$docs)
 head(tmod$features)
+
+#celui qui génère le plus de traffic, --> comment score
+dtotal$comment[905,]
 
 ## some graphical representation
 library(ggplot2)
@@ -412,6 +416,9 @@ rownames(df.feat) <- rownames(tmod$features)
 ggplot(df.feat, aes(x=dim1, y=dim2)) +
   geom_point() + 
   geom_text(label=rownames(df.feat))
+
+
+### COMMENT COMPRENDRE ET INTERPRETER ???? ###
 
 ## Low rank matrix calculations
 dfmat.test <- tmod$docs %*% diag(tmod$sk) %*% t(tmod$features)
@@ -505,3 +512,39 @@ augment(lda)
 ## New documents
 lda2 <- LDA(dtm[-1,], k = 10) # set asside 1 document
 posterior(lda2, newdata = dtm[1,])$topics
+
+
+## Boxplot
+par(mfrow=c(1,1))
+boxplot(dtotal$comment_score, xlab="Traffic following a post")
+
+#que les positifs
+dtotal_pos <- dtotal %>% 
+  filter(dtotal$comment_score < 10 & dtotal$comment_score > 0)
+
+boxplot(dtotal_pos$comment_score, xlab="Number of interactions")
+
+##----------------------------------------------------------#
+
+#Analyse sur les dates -- Il y a-t-il le plus de posts et reviews?
+library(dplyr)
+library(magrittr)
+library(readr)
+library(lubridate)
+
+#Par comment
+dtotal$comm_date <-  as_date(dtotal$comm_date)
+
+dtotal <- dtotal %>%
+  mutate(mois = month(dtotal$comm_date))
+
+plot(table(dtotal$mois))
+
+###sortir une marque
+neutrogena <- dtot.tok %>% 
+  filter(word=="neutrogena")
+
+### Il nous faudra la liste des marques de Rita et Alex pour continuer l'analyse (voir quelle marque apparait le plus)
+
+
+
