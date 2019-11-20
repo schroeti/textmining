@@ -394,7 +394,7 @@ plot_grid(a,b,c,d,e,f,g,h,i, labels=c("1","2","3","4","5","6","7","8","9"), ncol
 
 ##------------------------------------------- LSA
 ## Running the LSA with quanteda #
-dtot.cp2 <- corpus(dtotal$comment)
+dtot.cp2 <- corpus(ddtotal$comment)
 dfmat <- dfm(dtot.cp2, tolower = TRUE, remove = stopwords("english"), stem = FALSE, remove_punct = TRUE)
 tmod <- textmodel_lsa(dfmat, nd=10) # see also nd=58, 57, 10 etc. --> nombre de noeuds, plus le noeud est faible plus les groupes sont gros --> gros clusters
 head(tmod$docs)
