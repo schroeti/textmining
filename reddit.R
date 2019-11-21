@@ -35,7 +35,7 @@ dtotal <- tibble(text=dtotal$comment)
 dtot.tok <- dtotal%>% unnest_tokens(word, text, to_lower=TRUE)
 dtot.cp <- VCorpus(VectorSource(dtot.tok$word))
 dtot.cp <- tm_map(dtot.cp, removeWords, stopwords("english"))
-dtot.cp <- tm_map(dtot.cp, removeWords, c("skin", "sunscreen"))
+dtot.cp <- tm_map(dtot.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really","skincareaddiction","www.reddit.com","https"))
 dtot.cp
 
 inspect(dtot.cp)
@@ -330,15 +330,15 @@ dd9.df <- data.frame(word=names(dd9.fr), freq=dd9.fr)
 ggplot(top_n(dd9.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")
 
 
-a <- ggplot(top_n(dd1.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review1")+theme(legend.position = "None")
-b <- ggplot(top_n(dd2.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review2")+theme(legend.position = "None")
-c <- ggplot(top_n(dd3.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review3")+theme(legend.position = "None")
-d <- ggplot(top_n(dd4.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review4")+theme(legend.position = "None")
-e <- ggplot(top_n(dd5.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review5")+theme(legend.position = "None")
-f <- ggplot(top_n(dd6.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review6")+theme(legend.position = "None")
-g <- ggplot(top_n(dd7.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review7")+theme(legend.position = "None")
-h <- ggplot(top_n(dd8.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review8")+theme(legend.position = "None")
-i <- ggplot(top_n(dd9.df, n=5), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")+theme(legend.position = "None")
+a <- ggplot(top_n(dd1.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review1")+theme(legend.position = "None")
+b <- ggplot(top_n(dd2.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review2")+theme(legend.position = "None")
+c <- ggplot(top_n(dd3.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review3")+theme(legend.position = "None")
+d <- ggplot(top_n(dd4.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review4")+theme(legend.position = "None")
+e <- ggplot(top_n(dd5.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review5")+theme(legend.position = "None")
+f <- ggplot(top_n(dd6.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review6")+theme(legend.position = "None")
+g <- ggplot(top_n(dd7.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review7")+theme(legend.position = "None")
+h <- ggplot(top_n(dd8.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review8")+theme(legend.position = "None")
+i <- ggplot(top_n(dd9.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")+theme(legend.position = "None")
 
 par(mfrow=c(3,3))
 
@@ -388,8 +388,6 @@ with(d8.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 d9.counts <- count(d9.top50, word, sort=T)
 with(d9.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-
-plot_grid(a,b,c,d,e,f,g,h,i, labels=c("1","2","3","4","5","6","7","8","9"), ncol = 3, nrow = 3)
 
 
 ##------------------------------------------- LSA
