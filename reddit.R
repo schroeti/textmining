@@ -31,8 +31,8 @@ dtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 ## dtotal -- corpus
 library(tm)
-dtotal <- tibble(text=dtotal$comment)
-dtot.tok <- dtotal%>% unnest_tokens(word, text, to_lower=TRUE)
+dtotal <- tibble(text=dtotal$comment, doc=c(1:1549))
+dtot.tok <- dtotal%>% unnest_tokens(word, text, to_lower=TRUE) %>%count(doc, word, sort=TRUE) %>% ungroup()
 dtot.cp <- VCorpus(VectorSource(dtot.tok$word))
 dtot.cp <- tm_map(dtot.cp, removeWords, stopwords("english"))
 dtot.cp <- tm_map(dtot.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really","skincareaddiction","www.reddit.com","https"))
@@ -548,7 +548,50 @@ plot(table(ddtotal$mois))
 neutrogena <- dtot.tok %>% 
   filter(word=="neutrogena")
 
+biore <- dtot.tok %>% 
+  filter(word=="biore")
+
+cerave <- dtot.tok %>% 
+  filter(word=="cerave")
+
+paula.choice <- dtot.tok %>% #pas trouvé
+  filter(word=="paula s choice")
+
+australian.god <- dtotal %>% #pas trouvé 
+  str_extract_all("australian god")
+australian.god
+
+roche.posay <- dtotal %>% 
+  str_extract_all("roche posay")
+roche.posay
+clinique <- dtot.tok %>% 
+  filter(word=="clinique")
+
+
+
 ### Il nous faudra la liste des marques de Rita et Alex pour continuer l'analyse (voir quelle marque apparait le plus)
 #Cerave, etc.
 
+#heatmap
+
+#TF-IDF
+dtot.top10 <- top_n(dtot.df, n=10)
+token10 <- left_join(dtot.top10, dtot.tok)
+tok10 <- tok10 %>% 
+  select(word) %>% 
+  mutate(doc=1:10)
+
+dtot.tfidf <- bind_tf_idf(tok10, word, doc, n)
+dtot.tfidf
+
+matrice <- dtot.tfidf %>% 
+  select(word, tf_idf)
+
+matrice <- t(matrice)
+
+matrice <- as.data.frame(matrice)
+
+matrice <- as.matrix(matrice)
+
+heatmap(matrice)
 
