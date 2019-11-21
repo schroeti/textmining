@@ -186,6 +186,7 @@ dd.df <- data.frame(word=names(dd.fr), freq=dd.fr)
 return(dd.df)
 }
 
+freq.data(d1)
 #--------------------------------------------------------------------------#
 
 ##Review 1
@@ -401,7 +402,7 @@ head(tmod$docs)
 head(tmod$features)
 
 #celui qui génère le plus de traffic, --> comment score
-dtotal$comment[905,]
+ddtotal$comment[905,]
 
 ## some graphical representation
 library(ggplot2)
@@ -417,6 +418,7 @@ ggplot(df.feat, aes(x=dim1, y=dim2)) +
   geom_point() + 
   geom_text(label=rownames(df.feat))
 
+### mettre en couleur les mots positifs et négatifs
 
 ### COMMENT COMPRENDRE ET INTERPRETER ???? ###
 
@@ -519,12 +521,14 @@ par(mfrow=c(1,1))
 boxplot(dtotal$comment_score, xlab="Traffic following a post")
 
 #que les positifs
-dtotal_pos <- dtotal %>% 
-  filter(dtotal$comment_score < 10 & dtotal$comment_score > 0)
+dtotal_pos <- ddtotal %>% 
+  filter(ddtotal$comment_score < 10 & ddtotal$comment_score > 0)
 
 boxplot(dtotal_pos$comment_score, xlab="Number of interactions")
 
-##----------------------------------------------------------#
+#truc interactif pour montrer les négatifs
+
+##----------------------------------------------------------##
 
 #Analyse sur les dates -- Quand y a-t-il le plus de posts et reviews?
 library(dplyr)
@@ -533,18 +537,18 @@ library(readr)
 library(lubridate)
 
 #Par comment
-dtotal$comm_date <-  as_date(dtotal$comm_date)
+ddtotal$comm_date <-  as_date(ddtotal$comm_date)
 
-dtotal <- dtotal %>%
-  mutate(mois = month(dtotal$comm_date))
+ddtotal <- ddtotal %>%
+  mutate(mois = month(ddtotal$comm_date))
 
-plot(table(dtotal$mois))
+plot(table(ddtotal$mois))
 
 ###sortir une marque
 neutrogena <- dtot.tok %>% 
   filter(word=="neutrogena")
 
 ### Il nous faudra la liste des marques de Rita et Alex pour continuer l'analyse (voir quelle marque apparait le plus)
-
+#Cerave, etc.
 
 
