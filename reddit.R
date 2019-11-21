@@ -90,18 +90,21 @@ get_sentiments("loughran")
 filter(get_sentiments("loughran"), word %in% dtot.tok)
 
 
-dtot.sentiment <- dtot.tok %>% right_join(get_sentiments("nrc")) %>%
+dtot.sentiment.nrc <- dtot.tok %>% right_join(get_sentiments("nrc")) %>%
   count(sentiment, sort=T) #le meilleur
 
-dtot.sentiment <- dtot.tok %>% right_join(get_sentiments("bing")) %>%
+dtot.sentiment.bing <- dtot.tok %>% right_join(get_sentiments("bing")) %>%
   count(sentiment, sort=T) # NUL
 
-dtot.sentiment <- dtot.tok %>% right_join(get_sentiments("loughran")) %>%
+dtot.sentiment.loughran <- dtot.tok %>% right_join(get_sentiments("loughran")) %>%
   count(sentiment, sort=T)
 
 
 #plot sentiment
-ggplot(dtot.sentiment, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F)
+ggplot(dtot.sentiment.nrc, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) + ggtitle("nrc")
+ggplot(dtot.sentiment.bing, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) +ggtitle("bing")
+ggplot(dtot.sentiment.loughran, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F)+ggtitle("loughran")
+
 
 #word contributing to the sentiment
 word.sent <- inner_join(dtot.tok, get_sentiments(("nrc")))
