@@ -359,7 +359,6 @@ d8.top50 <- top_n(dd8.df, n=50)
 d9.top50 <- top_n(dd9.df, n=50)
 
 
-
 library(wordcloud)
 d1.counts <- count(d1.top50, word, sort=T)
 with(d1.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens"), vfont=c("serif","plain")))
@@ -424,7 +423,7 @@ range(dfmat.test - dfmat)
 range(dfmat.test - tmod$matrix_low_rank )
 
 ## Look at the terms linked to topic 1 and 2
-library(dplyr)
+
 lsa.terms.tbl <- tibble(Term=rownames(tmod$features), topic1=tmod$features[,1],
                         topic2=tmod$features[,2])
 
@@ -524,7 +523,7 @@ boxplot(dtotal_pos$comment_score, xlab="Number of interactions")
 
 ##----------------------------------------------------------#
 
-#Analyse sur les dates -- Il y a-t-il le plus de posts et reviews?
+#Analyse sur les dates -- Quand y a-t-il le plus de posts et reviews?
 library(dplyr)
 library(magrittr)
 library(readr)
