@@ -366,7 +366,7 @@ library(wordcloud)
 d1.counts <- count(d1.top50, word, sort=T)
 with(d1.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens"), vfont=c("serif","plain")))
 
-dt2.counts <- count(d2.top50, word, sort=T)
+d2.counts <- count(d2.top50, word, sort=T)
 with(d2.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 d3.counts <- count(d3.top50, word, sort=T)
