@@ -464,7 +464,8 @@ brands <- brands %>%
 
 #Number of time a brand appears in a review --> manque australian god et possiblement des roche posay
 ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
-  ggtitle("Appearance of brands in reviews") + scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9))
+  ggtitle("Appearance of brands in reviews") + scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9)) +
+  scale_fill_gradient(low="gray", high="red") + labs(x="Brands", y="Reviews")
 
 ##-----------------------------------------------------------------------##
 
@@ -474,19 +475,19 @@ ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
 dtot.top10 <- top_n(dtot.df, n=10)
 top10 <- unique(dtot.top10$word)
 token10 <- left_join(dtot.top10, dtot.tok)
-token10 <- token10 %>% 
-  select(word) %>% 
-  mutate(doc=1:10)
 
 dtot.tfidf <- bind_tf_idf(token10, word, doc, n)
 dtot.tfidf
 
-#test avec fonction heatmap() que je n'arrive pas encore à faire
-matrice <- dtot.tfidf %>% 
-  select(tf_idf)
+idf <- dtot.tfidf %>% 
+  select(tf,idf,tf_idf)
+
+matrice <- as.matrix(idf)
 
 heatmap(matrice)
 
-#Try with ggplot --> pas ce qu'on veut...
-ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf))
+#il faut faire une matrice ...
 
+#Try with ggplot --> pas ce qu'on veut...
+ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf)) + labs(X=" ", y=" ") +
+  ggtitle("tf-idf pour chaque mots...")
