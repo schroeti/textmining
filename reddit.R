@@ -376,18 +376,18 @@ augment(lda)
 lda2 <- LDA(dtm[-1,], k = 10) # set asside 1 document
 posterior(lda2, newdata = dtm[1,])$topics
 
-
+#--------------------------------------------------------------#
 ## Boxplot
-par(mfrow=c(1,1))
 boxplot(dtotal$comment_score, xlab="Traffic following a post")
 
-#que les positifs
-dtotal_pos <- ddtotal %>% 
-  filter(ddtotal$comment_score < 10 & ddtotal$comment_score > 0)
+
+#que les positifs et on enlève les outliers
+dtotal_pos <- dtotal %>% 
+  filter(dtotal$comment_score < 10 & dtotal$comment_score > 0)
 
 boxplot(dtotal_pos$comment_score, xlab="Number of interactions")
 
-#truc interactif pour montrer les négatifs
+#truc interactif pour montrer les négatifs --> plotly ne fonctionne pas
 
 ##----------------------------------------------------------##
 
@@ -462,6 +462,7 @@ brands <- brands %>%
   mutate(n_rev = sum(n)) %>% 
   ungroup()
 
+
 #Number of time a brand appears in a review --> manque australian god et possiblement des roche posay
 ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
   ggtitle("Appearance of brands in reviews") + scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9)) +
@@ -469,7 +470,7 @@ ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
 
 ##-----------------------------------------------------------------------##
 
-## HEATMAPS
+## HEATMAPS --> PAS ENCORE REUSSI
 
 #TF-IDF
 dtot.top10 <- top_n(dtot.df, n=10)
@@ -479,14 +480,22 @@ token10 <- left_join(dtot.top10, dtot.tok)
 dtot.tfidf <- bind_tf_idf(token10, word, doc, n)
 dtot.tfidf
 
-idf <- dtot.tfidf %>% 
-  select(tf,idf,tf_idf)
+tfidf <- dtot.tfidf %>% 
+  select(word,tf_idf) %>% 
+  group_by(word) %>% 
+  mutate(tfidf = mean(tf_idf)) %>% 
+  select(word,tfidf) %>% 
+  group_by(word,tfidf) %>% 
+  na.omit() %>% 
+  summarise()
 
-matrice <- as.matrix(idf)
+#install.packages("rdist")
+library(rdist)
+dist <- rdist(tfidf$tfidf, metric = "euclidean", p = 2)
+dist <-  as.matrix(dist)
 
-heatmap(matrice)
+heatmap(dist,Colv = NA, Rowv = NA, scale="column")
 
-#il faut faire une matrice ...
 
 #Try with ggplot --> pas ce qu'on veut...
 ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf)) + labs(X=" ", y=" ") +
