@@ -386,12 +386,18 @@ library(readr)
 library(lubridate)
 
 #Par comment
-ddtotal$comm_date <-  as_date(ddtotal$comm_date)
+dtotal$comm_date <-  as_date(dtotal$comm_date)
 
-ddtotal <- ddtotal %>%
-  mutate(mois = month(ddtotal$comm_date))
+dtotal <- dtotal %>%
+  mutate(mois = month(dtotal$comm_date))
 
-plot(table(ddtotal$mois))
+plot(table(dtotal$mois))
+
+ggplot(data=dtotal, aes(x=mois, y=mois)) +
+  geom_bar(stat="identity") + labs(x="Month", y="Comments") + 
+  ggtitle("Comments per month")
+
+##---------------------------------------------------Brand Analysis
 
 ###sortir une marque
 neutrogena <- dtot.tok %>% 
