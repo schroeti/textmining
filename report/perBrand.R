@@ -172,6 +172,7 @@ plot_sentiment_pagenormalized.2(1)%>%plot()
 plot_sentiment_page_sun(1)%>%plot()
 plot_sentiment_pagenormalized_sun(1)%>%plot()
 
+#modify sentiments per product too with new
 
 
 
