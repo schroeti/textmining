@@ -483,13 +483,9 @@ dtot.tfidf
 
 #test avec fonction heatmap() que je n'arrive pas encore à faire
 matrice <- dtot.tfidf %>% 
-  select(word, tf_idf)
-matrice <- t(matrice)
-geom_tile()
-matrice <- as.data.frame(matrice)
-matrice <- as.matrix(top10)
-heatmap(matrice)
+  select(tf_idf)
 
+heatmap(matrice)
 
 #Try with ggplot --> pas ce qu'on veut...
 ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf))
