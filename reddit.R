@@ -247,7 +247,7 @@ with(d9.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
 ## Running the LSA with quanteda
 dtot.cp2 <- corpus(dtotal$comment)
-dfmat <- dfm(dtot.cp2, tolower = TRUE, remove = stopwords("english"), stem = FALSE, remove_punct = TRUE)
+dfmat <- dfm(dtot.cp2, tolower = TRUE, remove = c(stopwords("english"), c("m","s","t","skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https")), stem = FALSE, remove_punct = TRUE)
 tmod <- textmodel_lsa(dfmat, nd=5) # on peut changer nd=5, 10, etc. --> nombre de noeuds, plus le noeud est faible plus les groupes sont gros --> gros clusters
 head(tmod$docs)
 head(tmod$features)
@@ -264,14 +264,25 @@ ggplot(df.doc, aes(x=dim1, y=dim2)) +
   geom_text(label=rownames(df.doc)) +
   ggtitle("Association of the texts (comments) to dim1 and dim2")
 
-df.feat <- data.frame(dim1=tmod$features[,1], dim2=tmod$features[,2])
+df.feat <- data.frame(dim1=tmod$features[,1], dim2=tmod$features[,2], rownames(tmod$features))
 rownames(df.feat) <- rownames(tmod$features)
-ggplot(df.feat, aes(x=dim1, y=dim2)) +
+colnames(df.feat)
+
+dtot.tok.sent <- dtot.tok %>% right_join(get_sentiments("bing"))
+
+df.feat <- left_join(df.feat, dtot.tok.sent, by=c("rownames.tmod.features."="word"))
+
+ggplot(df.feat, aes(x=dim1, y=dim2, col=sentiment.y)) +
   geom_point() + 
   geom_text(label=rownames(df.feat))+
-  ggtitle("Association of the words to dim1 and dim2")
+  ggtitle("Association of the words to dim1 and dim2 - lexicon bing")
 
-### mettre en couleur les mots positifs et négatifs
+ggplot(df.feat, aes(x=dim1, y=dim2, col=sentiment.x)) +
+  geom_point() + 
+  geom_text(label=rownames(df.feat))+
+  ggtitle("Association of the words to dim1 and dim2 - lexicon nrc")# pas terrible
+
+### mettre en couleur les mots positifs et négatifs -- see above
 
 ## Low rank matrix calculations
 dfmat.test <- tmod$docs %*% diag(tmod$sk) %*% t(tmod$features)
@@ -348,8 +359,8 @@ beta.top.terms %>%
 ## describes the topics in each documents
 gamma.td <- tidy(lda, matrix = "gamma")
 gamma.td
-filter(gamma.td, document=="1825-Adams") ## topics in this documents
-sum(filter(gamma.td, document=="1825-Adams")$gamma) 
+filter(gamma.td, document=="") ## topics in this documents
+sum(filter(gamma.td, document=="")$gamma) 
 
 gamma.td %>%
   ggplot(aes(document, gamma, fill = factor(topic))) +
@@ -451,7 +462,7 @@ brands <- brands %>%
   mutate(n_rev = sum(n)) %>% 
   ungroup()
 
-#Number of time a brand appears in a review
+#Number of time a brand appears in a review --> manque australian god et possiblement des roche posay
 ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
   ggtitle("Appearance of brands in reviews") + scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9))
 
@@ -470,7 +481,7 @@ token10 <- token10 %>%
 dtot.tfidf <- bind_tf_idf(token10, word, doc, n)
 dtot.tfidf
 
-#test avec fonction heatmap() que je n'arrive pas à faire
+#test avec fonction heatmap() que je n'arrive pas encore à faire
 matrice <- dtot.tfidf %>% 
   select(word, tf_idf)
 matrice <- t(matrice)
@@ -480,6 +491,6 @@ matrice <- as.matrix(top10)
 heatmap(matrice)
 
 
-#Try with ggplot --> pas terrible, pas ce qu'on veut...
+#Try with ggplot --> pas ce qu'on veut...
 ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf))
 
