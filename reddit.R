@@ -31,8 +31,8 @@ dtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 ## dtotal -- corpus
 library(tm)
-dtotal <- tibble(text=dtotal$comment, doc=c(1:1549))
-dtot.tok <- dtotal%>% unnest_tokens(word, text, to_lower=TRUE) %>%count(doc, word, sort=TRUE) %>% ungroup()
+dtotal.tib <- tibble(text=dtotal$comment, doc=c(1:1549))
+dtot.tok <- dtotal.tib%>% unnest_tokens(word, text, to_lower=TRUE) %>%count(doc, word, sort=TRUE) %>% ungroup()
 dtot.cp <- VCorpus(VectorSource(dtot.tok$word))
 dtot.cp <- tm_map(dtot.cp, removeWords, stopwords("english"))
 dtot.cp <- tm_map(dtot.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really","skincareaddiction","www.reddit.com","https"))
@@ -55,12 +55,11 @@ dtot.fr <- colSums(as.matrix(dtot.dtm))
 dtot.fr
 dtot.df <- data.frame(word=names(dtot.fr), freq=dtot.fr)
 require(ggplot2)
-ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()
+ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Frequency of the most seen words in all reviews")
 
 #tot 50
 dtot.top50 <- top_n(dtot.df, n=50)
-dtot.top502 <- top_n(dtot.tok, n=50) #fonctionne pas
-dtot.top503 <- top_n(dtot.cp, n=50) #fonctionne pas
+dtot.top502 <- top_n(dtot.tok, n=50) #fonctionne pas vraiment
 
 #Cloud of words
 library(wordcloud)
@@ -69,9 +68,6 @@ with(dtot.counts, wordcloud(word, max.words = 100))
 
 dtot.counts <- count(dtot.top502, word, sort=T)
 with(dtot.counts, wordcloud(word, max.words = 100))
-
-dtot.counts <- count(dtot.top503, word, sort=T)
-with(dtot.counts, wordcloud(word, max.words = 100), margin(t=0, r=0, b=0, l=0, unit ="pt"))
 
 ###----------------------------------sentiment analysis
 library(stringr)
@@ -99,19 +95,18 @@ dtot.sentiment.bing <- dtot.tok %>% right_join(get_sentiments("bing")) %>%
 dtot.sentiment.loughran <- dtot.tok %>% right_join(get_sentiments("loughran")) %>%
   count(sentiment, sort=T)
 
+#plot sentiment ---> POURQUOI ILS NE FONCTIONNENT PLUS CHEZ MOI? --> nn au lieu de n (nom des colonnes...)
+ggplot(dtot.sentiment.nrc, aes(sentiment,nn)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) + ggtitle("Sentiment using the nrc lexicon")
+ggplot(dtot.sentiment.bing, aes(sentiment, nn)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) +ggtitle("Sentiment using the bing lexicon")
+ggplot(dtot.sentiment.loughran, aes(sentiment, nn)) + geom_bar(alpha=0.5, stat="identity", show.legend=F)+ggtitle("Sentiment using the loughran lexicon")
 
-#plot sentiment
-ggplot(dtot.sentiment.nrc, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) + ggtitle("nrc")
-ggplot(dtot.sentiment.bing, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) +ggtitle("bing")
-ggplot(dtot.sentiment.loughran, aes(sentiment, n)) + geom_bar(alpha=0.5, stat="identity", show.legend=F)+ggtitle("loughran")
 
-
-#word contributing to the sentiment
+#word contributing to the sentiment --> pas vraiment utile ou juste (A voir ce qu'on peut faire d'autre)
 word.sent <- inner_join(dtot.tok, get_sentiments(("nrc")))
 word.sent <- count(word.sent, word, sentiment, sort=T)
 word.sent %>%
   top_n(n=10)%>%
-  ggplot(aes(reorder(word,n),n, fill=sentiment)) +
+  ggplot(aes(reorder(word,nn),nn, fill=sentiment)) +
   geom_bar(alpha=0.8, stat="identity")+
   labs(y="Contribution to sentiment", x=NULL)+
   coord_flip()
@@ -121,22 +116,6 @@ library(sentimentr)
 dtotal.pol <- sentiment_by(dtotal$comment)
 dtotal.pol
 
-get_sentiments("nrc")
-filter(get_sentiments("nrc"), word %in% dtotal$comment)
-
-dtotal.sent <- dtotal %>% right_join(get_sentiments("nrc"), by=NULL) %>%
-  count(sentiment, sort=T) #le meilleur
-
-?right_join
-
-word.sent <- inner_join(dtotal.sent, get_sentiments(("nrc")))
-word.sent <- count(dtotal.sent, comment, sentiment, sort=T)
-word.sent %>%
-  top_n(n=10)%>%
-  ggplot(aes(reorder(word,n),n, fill=sentiment)) +
-  geom_bar(alpha=0.8, stat="identity")+
-  labs(y="Contribution to sentiment", x=NULL)+
-  coord_flip()
 
 ##-----------------------------------------SIMILARITIES
 
@@ -144,13 +123,13 @@ word.sent %>%
 
 library(quanteda)
 
-#To know which review
+#To know which review (bien contrôler que le nombre de commentaires ne change pas, sinon à changer manuellement)
 reviews <- data.frame(num_comments = c(83,450,320,363,8,116,35,154,10), review = c(1,2,3,4,5,6,7,8,9))
 
-ddtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
+dtotal.rev <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 #Copié-collé de plus haut...
-dd <- ddtotal %>%
+dd <- dtotal.rev %>%
   select(num_comments, comment)
 dd <- left_join(dd,reviews)
 dd.tok <- dd %>% 
@@ -166,10 +145,10 @@ dd.fr <- colSums(as.matrix(dd.dtm))
 dd.fr
 dd.df <- data.frame(word=names(dd.fr), freq=dd.fr)
 require(ggplot2)
-ggplot(top_n(dd.df, n=20), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()
+ggplot(top_n(dd.df, n=20), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Frequency of the most used words - dd.df / dtot.rev")
 
 
-##---------------------------------------------### Function qui fonctionne pas...
+##---------------------------------------------### Function pour chaque poste
 freq.data <- function(data) {
 dd.tok <- data %>% 
   unnest_tokens(word, comment, to_lower=TRUE)
@@ -186,241 +165,112 @@ dd.df <- data.frame(word=names(dd.fr), freq=dd.fr)
 return(dd.df)
 }
 
-freq.data(d1)
-#--------------------------------------------------------------------------#
+d1.df <- freq.data(d1)
+d2.df <- freq.data(d2)
+d3.df <- freq.data(d3)
+d4.df <- freq.data(d4)
+d5.df <- freq.data(d5)
+d6.df <- freq.data(d6)
+d7.df <- freq.data(d7)
+d8.df <- freq.data(d8)
+d9.df <- freq.data(d9)
 
-##Review 1
-dd1 <- dd %>% 
-  filter(review == 1)
-dd1.tok <- dd1 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd1.cp <- VCorpus(VectorSource(dd1.tok$word))
-dd1.cp <- tm_map(dd1.cp, removeWords, stopwords("english"))
-dd1.cp <- tm_map(dd1.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd1.dtm <- DocumentTermMatrix(dd1.cp)
-#Frequencies + plot
-dd1.fr <- colSums(as.matrix(dd1.dtm))
-dd1.fr
-dd1.df <- data.frame(word=names(dd1.fr), freq=dd1.fr)
-ggplot(top_n(dd1.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review1")
+#Plots of the most frequent words in each review (We can choose how many we want to show)
+freq1 <- ggplot(top_n(d1.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 1")
+freq2 <- ggplot(top_n(d2.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 2")
+freq3 <- ggplot(top_n(d3.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 3")
+freq4 <- ggplot(top_n(d4.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 4")
+freq5 <- ggplot(top_n(d5.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 5")
+freq6 <- ggplot(top_n(d6.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 6")
+freq7 <- ggplot(top_n(d7.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 7")
+freq8 <- ggplot(top_n(d8.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 8")
+freq9 <- ggplot(top_n(d9.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Most frequent words in review 9")
 
-##Review 2
-dd2 <- dd %>% 
-  filter(review == 2)
-dd2.tok <- dd2 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd2.cp <- VCorpus(VectorSource(dd2.tok$word))
-dd2.cp <- tm_map(dd2.cp, removeWords, stopwords("english"))
-dd2.cp <- tm_map(dd2.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd2.dtm <- DocumentTermMatrix(dd2.cp)
-#Frequencies + plot
-dd2.fr <- colSums(as.matrix(dd2.dtm))
-dd2.fr
-dd2.df <- data.frame(word=names(dd2.fr), freq=dd2.fr)
-ggplot(top_n(dd2.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review2")
+freq1
+freq2
+freq3
+freq4
+freq5
+freq6
+freq7
+freq8
+freq9
 
-##Review 3
-dd3 <- dd %>% 
-  filter(review == 3)
-dd3.tok <- dd3 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd3.cp <- VCorpus(VectorSource(dd3.tok$word))
-dd3.cp <- tm_map(dd3.cp, removeWords, stopwords("english"))
-dd3.cp <- tm_map(dd3.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd3.dtm <- DocumentTermMatrix(dd3.cp)
-#Frequencies + plot
-dd3.fr <- colSums(as.matrix(dd3.dtm))
-dd3.fr
-dd3.df <- data.frame(word=names(dd3.fr), freq=dd3.fr)
-ggplot(top_n(dd3.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review3")
-
-##Review 4
-dd4 <- dd %>% 
-  filter(review == 4)
-dd4.tok <- dd4 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd4.cp <- VCorpus(VectorSource(dd4.tok$word))
-dd4.cp <- tm_map(dd4.cp, removeWords, stopwords("english"))
-dd4.cp <- tm_map(dd4.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd4.dtm <- DocumentTermMatrix(dd4.cp)
-#Frequencies + plot
-dd4.fr <- colSums(as.matrix(dd4.dtm))
-dd4.fr
-dd4.df <- data.frame(word=names(dd4.fr), freq=dd4.fr)
-ggplot(top_n(dd4.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review4")
-
-##Review 5
-dd5 <- dd %>% 
-  filter(review == 5)
-dd5.tok <- dd5 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd5.cp <- VCorpus(VectorSource(dd5.tok$word))
-dd5.cp <- tm_map(dd5.cp, removeWords, stopwords("english"))
-dd5.cp <- tm_map(dd5.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd5.dtm <- DocumentTermMatrix(dd5.cp)
-#Frequencies + plot
-dd5.fr <- colSums(as.matrix(dd5.dtm))
-dd5.fr
-dd5.df <- data.frame(word=names(dd5.fr), freq=dd5.fr)
-ggplot(top_n(dd5.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review5")
-
-##Review 6
-dd6 <- dd %>% 
-  filter(review == 6)
-dd6.tok <- dd6 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd6.cp <- VCorpus(VectorSource(dd6.tok$word))
-dd6.cp <- tm_map(dd6.cp, removeWords, stopwords("english"))
-dd6.cp <- tm_map(dd6.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd6.dtm <- DocumentTermMatrix(dd6.cp)
-#Frequencies + plot
-dd6.fr <- colSums(as.matrix(dd6.dtm))
-dd6.fr
-dd6.df <- data.frame(word=names(dd6.fr), freq=dd6.fr)
-ggplot(top_n(dd6.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review6")
-
-##Review 7
-dd7 <- dd %>% 
-  filter(review == 7)
-dd7.tok <- dd7 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd7.cp <- VCorpus(VectorSource(dd7.tok$word))
-dd7.cp <- tm_map(dd7.cp, removeWords, stopwords("english"))
-dd7.cp <- tm_map(dd7.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd7.dtm <- DocumentTermMatrix(dd7.cp)
-#Frequencies + plot
-dd7.fr <- colSums(as.matrix(dd7.dtm))
-dd7.fr
-dd7.df <- data.frame(word=names(dd7.fr), freq=dd7.fr)
-ggplot(top_n(dd7.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review7")
-
-##Review 8
-dd8 <- dd %>% 
-  filter(review == 8)
-dd8.tok <- dd8 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd8.cp <- VCorpus(VectorSource(dd8.tok$word))
-dd8.cp <- tm_map(dd8.cp, removeWords, stopwords("english"))
-dd8.cp <- tm_map(dd8.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd8.dtm <- DocumentTermMatrix(dd8.cp)
-#Frequencies + plot
-dd8.fr <- colSums(as.matrix(dd8.dtm))
-dd8.fr
-dd8.df <- data.frame(word=names(dd8.fr), freq=dd8.fr)
-ggplot(top_n(dd8.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review8")
-
-##Review 9
-dd9 <- dd %>% 
-  filter(review == 9)
-dd9.tok <- dd9 %>% 
-  unnest_tokens(word, comment, to_lower=TRUE)
-dd9.cp <- VCorpus(VectorSource(dd9.tok$word))
-dd9.cp <- tm_map(dd9.cp, removeWords, stopwords("english"))
-dd9.cp <- tm_map(dd9.cp, removeWords, c("skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
-#document term matrix
-dd9.dtm <- DocumentTermMatrix(dd9.cp)
-#Frequencies + plot
-dd9.fr <- colSums(as.matrix(dd9.dtm))
-dd9.fr
-dd9.df <- data.frame(word=names(dd9.fr), freq=dd9.fr)
-ggplot(top_n(dd9.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")
-
-
-a <- ggplot(top_n(dd1.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review1")+theme(legend.position = "None")
-b <- ggplot(top_n(dd2.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review2")+theme(legend.position = "None")
-c <- ggplot(top_n(dd3.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review3")+theme(legend.position = "None")
-d <- ggplot(top_n(dd4.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review4")+theme(legend.position = "None")
-e <- ggplot(top_n(dd5.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review5")+theme(legend.position = "None")
-f <- ggplot(top_n(dd6.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review6")+theme(legend.position = "None")
-g <- ggplot(top_n(dd7.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review7")+theme(legend.position = "None")
-h <- ggplot(top_n(dd8.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review8")+theme(legend.position = "None")
-i <- ggplot(top_n(dd9.df, n=5), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review9")+theme(legend.position = "None")
-
-par(mfrow=c(3,3))
-
+#Show the plots in the same window
 library(cowplot)
-plot_grid(a,b,c,d,e,f,g,h,i, labels=c("1","2","3","4","5","6","7","8","9"), ncol = 3, nrow = 3)
+plot_grid(freq1,freq2,freq3,freq4,freq5,freq6,freq6,freq7,freq8,freq9, labels=c("1","2","3","4","5","6","7","8","9"), ncol = 3, nrow = 3)
 
 #---------------------------------------------------------------------------------------#
-###fonctionne pas non plus...
+#Wordclouds for each review --< stylé mais pas très utile car les mots sont plus ou moins tous de la même grandeur (fréqence proche)
 
-d1.top50 <- top_n(dd1.df, n=50)
-d2.top50 <- top_n(dd2.df, n=50)
-d3.top50 <- top_n(dd3.df, n=50)
-d4.top50 <- top_n(dd4.df, n=50)
-d5.top50 <- top_n(dd5.df, n=50)
-d6.top50 <- top_n(dd6.df, n=50)
-d7.top50 <- top_n(dd7.df, n=50)
-d8.top50 <- top_n(dd8.df, n=50)
-d9.top50 <- top_n(dd9.df, n=50)
+d1.top10 <- top_n(d1.df, n=10)
+d2.top10 <- top_n(d2.df, n=10)
+d3.top10 <- top_n(d3.df, n=10)
+d4.top10 <- top_n(d4.df, n=10)
+d5.top10 <- top_n(d5.df, n=10)
+d6.top10 <- top_n(d6.df, n=10)
+d7.top10 <- top_n(d7.df, n=10)
+d8.top10 <- top_n(d8.df, n=10)
+d9.top10 <- top_n(d9.df, n=10)
 
-
-library(wordcloud)
-d1.counts <- count(d1.top50, word, sort=T)
+d1.counts <- count(d1.top10, word, sort=T)
 with(d1.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens"), vfont=c("serif","plain")))
 
-d2.counts <- count(d2.top50, word, sort=T)
+d2.counts <- count(d2.top10, word, sort=T)
 with(d2.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d3.counts <- count(d3.top50, word, sort=T)
+d3.counts <- count(d3.top10, word, sort=T)
 with(d3.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d4.counts <- count(d4.top50, word, sort=T)
+d4.counts <- count(d4.top10, word, sort=T)
 with(d4.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d5.counts <- count(d5.top50, word, sort=T)
+d5.counts <- count(d5.top10, word, sort=T)
 with(d5.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d6.counts <- count(d6.top50, word, sort=T)
+d6.counts <- count(d6.top10, word, sort=T)
 with(d6.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d7.counts <- count(d7.top50, word, sort=T)
+d7.counts <- count(d7.top10, word, sort=T)
 with(d7.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d8.counts <- count(d8.top50, word, sort=T)
+d8.counts <- count(d8.top10, word, sort=T)
 with(d8.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
-d9.counts <- count(d9.top50, word, sort=T)
+d9.counts <- count(d9.top10, word, sort=T)
 with(d9.counts, wordcloud(word, max.words = 10,colors=brewer.pal(5, "Greens")))
 
+#A voir si on garde ou pas, si oui les mettre dans la même fenêtre
 
+##------------------------------------------------ LSA
 
-##------------------------------------------- LSA
-## Running the LSA with quanteda #
-dtot.cp2 <- corpus(ddtotal$comment)
+## Running the LSA with quanteda
+dtot.cp2 <- corpus(dtotal$comment)
 dfmat <- dfm(dtot.cp2, tolower = TRUE, remove = stopwords("english"), stem = FALSE, remove_punct = TRUE)
-tmod <- textmodel_lsa(dfmat, nd=10) # see also nd=58, 57, 10 etc. --> nombre de noeuds, plus le noeud est faible plus les groupes sont gros --> gros clusters
+tmod <- textmodel_lsa(dfmat, nd=5) # on peut changer nd=5, 10, etc. --> nombre de noeuds, plus le noeud est faible plus les groupes sont gros --> gros clusters
 head(tmod$docs)
 head(tmod$features)
 
-#celui qui génère le plus de traffic, --> comment score
-ddtotal$comment[905,]
+#celui qui génère le plus de traffic, --> comment score (méga long commentaire --> sûrement le commentaire du poste)
+dtotal[905,13]
 
-## some graphical representation
+## some graphical representation - chaque texte correspond à une commentaire.
 library(ggplot2)
 df.doc <- data.frame(dim1=tmod$docs[,1], dim2=tmod$docs[,2])
 rownames(df.doc) <- rownames(tmod$docs)
 ggplot(df.doc, aes(x=dim1, y=dim2)) +
   geom_point() + 
-  geom_text(label=rownames(df.doc))
+  geom_text(label=rownames(df.doc)) +
+  ggtitle("Association of the texts (comments) to dim1 and dim2")
 
 df.feat <- data.frame(dim1=tmod$features[,1], dim2=tmod$features[,2])
 rownames(df.feat) <- rownames(tmod$features)
 ggplot(df.feat, aes(x=dim1, y=dim2)) +
   geom_point() + 
-  geom_text(label=rownames(df.feat))
+  geom_text(label=rownames(df.feat))+
+  ggtitle("Association of the words to dim1 and dim2")
 
 ### mettre en couleur les mots positifs et négatifs
-
-### COMMENT COMPRENDRE ET INTERPRETER ???? ###
 
 ## Low rank matrix calculations
 dfmat.test <- tmod$docs %*% diag(tmod$sk) %*% t(tmod$features)
@@ -455,7 +305,6 @@ topic2.tbl <- rbind(top_n(lsa.doc.tbl, wt=topic2, n=10), top_n(lsa.doc.tbl, wt=t
 ggplot(topic2.tbl, aes(x = reorder(Doc, -topic2), y = topic2))+
   geom_bar(stat="identity", color='red',fill='pink') +
   theme(axis.text.x=element_text(angle=45, hjust=1))
-
 
 ##----------------------------------------------------- LDA
 
@@ -557,31 +406,30 @@ cerave <- dtot.tok %>%
 paula.choice <- dtot.tok %>% #pas trouvé
   filter(word=="paula s choice")
 
-australian.god <- dtotal %>% #pas trouvé 
+australian.god <- dtotal %>%
   str_extract_all("australian god")
 australian.god
 
 roche.posay <- dtotal %>% 
   str_extract_all("roche posay")
 roche.posay
+
 clinique <- dtot.tok %>% 
   filter(word=="clinique")
 
+##-----------------------------------------------------------------------##
 
-
-### Il nous faudra la liste des marques de Rita et Alex pour continuer l'analyse (voir quelle marque apparait le plus)
-#Cerave, etc.
-
-#heatmap
+#heatmap à faire encore!!!!!
 
 #TF-IDF
 dtot.top10 <- top_n(dtot.df, n=10)
+top10 <- unique(dtot.top10$word)
 token10 <- left_join(dtot.top10, dtot.tok)
-tok10 <- tok10 %>% 
+token10 <- token10 %>% 
   select(word) %>% 
   mutate(doc=1:10)
 
-dtot.tfidf <- bind_tf_idf(tok10, word, doc, n)
+dtot.tfidf <- bind_tf_idf(token10, word, doc, n)
 dtot.tfidf
 
 matrice <- dtot.tfidf %>% 
@@ -589,9 +437,11 @@ matrice <- dtot.tfidf %>%
 
 matrice <- t(matrice)
 
+geom_tile()
+
 matrice <- as.data.frame(matrice)
 
-matrice <- as.matrix(matrice)
+matrice <- as.matrix(top10)
 
 heatmap(matrice)
 
