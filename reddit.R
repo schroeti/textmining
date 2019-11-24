@@ -130,7 +130,8 @@ dtotal.rev <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 #Copié-collé de plus haut...
 dd <- dtotal.rev %>%
-  select(num_comments, comment)
+  select(num_comments, comment) %>% 
+  mutate(doc=c(1:1549))
 dd <- left_join(dd,reviews)
 dd.tok <- dd %>% 
   unnest_tokens(word, comment, to_lower=TRUE)
@@ -412,9 +413,15 @@ cerave <- dtot.tok %>%
 paula.choice <- dtot.tok %>% #pas trouvé
   filter(word=="paula s choice")
 
+australian.god <- dtot.tok %>% 
+  filter(word=="australian god")
+
 australian.god <- dtotal %>%
   str_extract_all("australian god")
 australian.god
+
+roche.posay <- dtot.tok %>% 
+  filter(word=="posay")
 
 roche.posay <- dtotal %>% 
   str_extract_all("roche posay")
@@ -423,9 +430,34 @@ roche.posay
 clinique <- dtot.tok %>% 
   filter(word=="clinique")
 
+brands <- rbind(neutrogena,biore,cerave,clinique, roche.posay, australian.god)
+
+brands$doc <- as.factor(brands$doc)
+
+ggplot(data=brands, aes(x=word, y=n)) +
+  geom_bar(stat="identity") + labs(x="Brand", y="Number") + 
+  ggtitle("Number of time a brand's name appear in a comment")
+
+#Brands/comments
+ggplot(data=brands, aes(x=word,y=doc)) + geom_tile(aes(fill=n))+
+  ggtitle("Appearance of brands in comments")
+
+#Brands/Review(doc)
+dd$doc <- as.factor(dd$doc)
+brands <- left_join(brands, dd)
+
+brands <- brands %>% 
+  group_by(review, word) %>% 
+  mutate(n_rev = sum(n)) %>% 
+  ungroup()
+
+#Number of time a brand appears in a review
+ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
+  ggtitle("Appearance of brands in reviews") + scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9))
+
 ##-----------------------------------------------------------------------##
 
-#heatmap à faire encore!!!!!
+## HEATMAPS
 
 #TF-IDF
 dtot.top10 <- top_n(dtot.df, n=10)
@@ -438,16 +470,16 @@ token10 <- token10 %>%
 dtot.tfidf <- bind_tf_idf(token10, word, doc, n)
 dtot.tfidf
 
+#test avec fonction heatmap() que je n'arrive pas à faire
 matrice <- dtot.tfidf %>% 
   select(word, tf_idf)
-
 matrice <- t(matrice)
-
 geom_tile()
-
 matrice <- as.data.frame(matrice)
-
 matrice <- as.matrix(top10)
-
 heatmap(matrice)
+
+
+#Try with ggplot --> pas terrible, pas ce qu'on veut...
+ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf))
 
