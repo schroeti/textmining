@@ -442,6 +442,7 @@ clinique <- dtot.tok %>%
   filter(word=="clinique")
 
 brands <- rbind(neutrogena,biore,cerave,clinique, roche.posay, australian.god)
+brands
 
 brands$doc <- as.factor(brands$doc)
 
@@ -500,3 +501,42 @@ heatmap(dist,Colv = NA, Rowv = NA, scale="column")
 #Try with ggplot --> pas ce qu'on veut...
 ggplot(dtot.tfidf, aes(x=word,y=word)) + geom_tile(aes(fill=tf_idf)) + labs(X=" ", y=" ") +
   ggtitle("tf-idf pour chaque mots...")
+
+
+#sortir le contexte (summer/winter)
+summer <- dtot.tok %>% 
+  filter(word=="summer")
+
+winter <- dtot.tok %>% 
+  filter(word=="winter")
+
+season <- rbind(winter,summer)
+
+season <- left_join(season, dtotal.tib, by="doc")
+
+season
+#on a regardé les commentaires de facon nominal et lorsque winter est indiqué dans les commentaires c'est pour dire qu'ils n'utilisent pas de creme solaire en hiver
+#australie / snow-skiing / renseignements
+
+#Est-ce qu'on parle de prix??
+
+#sentiment analysis des marques
+brands.tib <- tibble(text=brands$comment, doc=c(1:108))
+brands.tok <- brands.tib%>% unnest_tokens(word, text, to_lower=TRUE) %>%count(doc, word, sort=TRUE) %>% ungroup()
+
+brands.sentiment <- brands.tok %>% right_join(get_sentiments("bing"))
+brands.sentiment.doc <- brands.sentiment %>% 
+  group_by(doc) %>% 
+  count(max(sentiment))
+
+brands.sentiment.doc <- left_join(brands.sentiment.doc,brands.tib, by="doc") 
+brands.sentiment.doc <- left_join(brands.sentiment.doc, brands, by=c("text"="comment"))
+brands.sentiment.doc <- brands.sentiment.doc[1:110,]
+colnames(brands.sentiment.doc)[colnames(brands.sentiment.doc)=="max(sentiment)"] <- "sentiment"
+
+brands.sentiment.brand <- brands.sentiment.doc %>% 
+  group_by(word) %>% 
+  count(sentiment)
+
+ggplot(brands.sentiment.brand, aes(x = word, y = nnn, fill=sentiment))+
+  geom_bar(stat="identity") + ggtitle("Sentiment associated per brand")
