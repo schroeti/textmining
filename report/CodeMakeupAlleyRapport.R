@@ -414,8 +414,8 @@ get_similar <- function(w, df, k = 10) {
   return(head(sort(sims, decreasing = TRUE), n = k))
 }
 
-glove <- GlobalVectors$new(word_vectors_size = 25, vocabulary = featnames(sunscreen.fcm), x_max = 10)
-sunscreen.glove <- as.dfm(fit_transform(sunscreen.fcm, glove, n_iter = 10) + t(glove$components))
+glove <- GlobalVectors$new(word_vectors_size = 50, vocabulary = featnames(sunscreen.fcm), x_max = 10)
+sunscreen.glove <- as.dfm(fit_transform(sunscreen.fcm, glove, n_iter = 50) + t(glove$components))
 
 get_similar(sunscreen.glove["lotion",] - sunscreen.glove["liquid",] + sunscreen.glove["cream",], sunscreen.glove)
 
@@ -428,4 +428,18 @@ plot(clustering)
 pca <- prcomp(sunscreen.glove[top50,])
 plot(pca$x[,1:2], col='white')
 text(pca$x[,1:2], labels = rownames(pca$x))
+
+word_vectors <- glove$components
+
+sun2.doc <- matrix(nr=nrow(word_vectors), nc=length(sunscreen_corpus))
+colnames(sun2.doc) <- names(sunscreen_corpus)
+for (i in 1:length(sunscreen_corpus)){
+  sun2.doc[,i] <- apply(word_vectors[,sunscreen_corpus[[i]], drop = F], 1, mean)
+}
+
+sun2.doc <- as.matrix(sun2.doc)
+
+sun2.doc <- t(sun2.doc)
+
+sun2.doc <- as.data.frame(sun2.doc) 
 
