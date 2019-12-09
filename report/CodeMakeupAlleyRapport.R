@@ -294,6 +294,12 @@ plot_sentiment_pagenormalized_sun_product(1)%>%plot()
 
 ##STILL WANT TO ADD A TAG FOR BRAND / PRODUCT 
 
+
+dfmat <- dfm(sunscreen_corpus,
+             remove_punct = TRUE, tolower=TRUE, remove = stopwords("english"))
+dfmat<-dfm(sunscreen_corpus,
+           remove_punct = TRUE, remove = my_stop_words$word)
+
 sunscreen_nostopword_corpus <- sunscreen %>%
   mutate(review2 = review) %>%
   as.tibble()
@@ -323,7 +329,7 @@ sunscreen_corpus_perbrand<-corpus(sunscreen_nostopword_corpusbrand$review)%>%
 sunscreen_corpus<- tokens_remove(sunscreen_corpus, pattern= my_stop_words, padding=FALSE)
 sunscreen_corpus_perbrand<- tokens_remove(sunscreen_corpus_perbrand, pattern= my_stop_words, padding=FALSE)
 
- method = cosine
+ #method = cosine
 (tstat2 <- textstat_simil(dfmat, method = "cosine", margin = "documents"))
 sum(dfmat[1,]*dfmat[2,])/sqrt(sum(dfmat[1,]^2)*sum(dfmat[2,]^2))
 
@@ -333,10 +339,6 @@ par(mfrow=c(1,1))
 plot(hclust(as.dist(1-tstat2)))
 
 
-dfmat <- dfm(sunscreen_corpus,
-             remove_punct = TRUE, tolower=TRUE, remove = stopwords("english"))
-dfmat<-dfm(sunscreen_corpus,
-           remove_punct = TRUE, remove = my_stop_words$word)
 
 #LDA
 
