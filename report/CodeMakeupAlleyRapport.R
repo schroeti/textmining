@@ -82,7 +82,7 @@ tf_byreview<- sunscreen_cleaned %>%
   count(word) %>%
   ungroup()
 
-tfidf_byreview<-tf%>%
+tfidf_byreview<-tf_byreview%>%
   tidytext::bind_tf_idf(word, reviewId, n )
 
 tf_byproduct <- sunscreen_cleaned %>%
@@ -90,7 +90,7 @@ tf_byproduct <- sunscreen_cleaned %>%
   count(word) %>%
   ungroup()
 
-tfidf_product<-tf %>%
+tfidf_product<-tf_byproduct%>%
   bind_tf_idf(word, productName, n )
 
 
