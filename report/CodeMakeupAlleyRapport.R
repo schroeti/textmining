@@ -166,11 +166,11 @@ sentiment_by_brand_sun<-sunscreen_cleaned_for_wordcloud %>%
 
 sentiment_normalized_perbrand_sun<-sentiment_by_brand_sun%>%
   group_by(brandName)%>%
-  mutate(norm=n/max(n))
+  mutate(norm=n/sum(n))
 
 sentiment_normalized_perbrand<-sentiment_by_brand.2%>%
   group_by(brandName)%>%
-  mutate(norm=n/max(n))
+  mutate(norm=n/sum(n))
 
 
 plot_sentiment_page.2 <- function(p){
@@ -240,11 +240,11 @@ sentiment_by_brand_sun_product<-sunscreen_cleaned_for_wordcloud_product %>%
 
 sentiment_normalized_perbrand_sun_product<-sentiment_by_brand_sun_product%>%
   group_by(productName)%>%
-  mutate(norm=n/max(n))
+  mutate(norm=n/sum(n))
 
 sentiment_normalized_perbrand_product<-sentiment_by_brand_product.2%>%
   group_by(productName)%>%
-  mutate(norm=n/max(n))
+  mutate(norm=n/sum(n))
 
 
 plot_sentiment_page_product.2 <- function(p){
