@@ -62,7 +62,8 @@ sunscreen$productName<-tolower(sunscreen$productName)
 
 #We put as stopwords common english words as well as the names of the brands and products 
 my_stop_words <- c(word = c("#", "s", "ve", "re", "skin", "sunscreen", "product","spf", brands, productnames, "shield",
-                            "sunscreen","sunscreens","t","it","It","use"), c(stopwords::stopwords("en")))
+                            "sunscreen","sunscreens","t","it","It","use"), c(stopwords::stopwords("en")))%>%as_tibble()
+my_stop_words$word<-my_stop_words$value
 
 #We create a review2 column that remains untouched and we tokenize review
 #We then take away the stop words
