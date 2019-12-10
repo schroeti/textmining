@@ -472,3 +472,7 @@ sentiment_per_text <-
   group_by(reviewId) %>%
   summarize(sentimenttext = sum(senmoins + senplus))
 
+saveRDS(sentiment_per_text, file="../data/sentiment_per_text.RData")
+
+
+
