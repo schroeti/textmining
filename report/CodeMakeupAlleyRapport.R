@@ -27,7 +27,7 @@ library(wordcloud)
 setwd("../data")
 sunscreen <-
   list.files(pattern = "*.csv") %>%
-  map_df(~read_csv(.))
+  map_df(~read_csv(.)) 
 
 #preformating of the database
 
