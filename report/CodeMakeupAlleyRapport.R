@@ -448,6 +448,8 @@ sun2.doc <- t(sun2.doc)
 
 sun2.doc <- as.data.frame(sun2.doc) 
 
+sun2.doc <- as.data.frame(sun2.doc) %>% mutate(text = 1:nrow(sun2.doc))
+
 
 
 
@@ -471,4 +473,65 @@ sentiment_per_text <-
   sentiment_review %>% select(reviewId, senmoins, senplus) %>%
   group_by(reviewId) %>%
   summarize(sentimenttext = sum(senmoins + senplus))
+
+#########################################
+
+# Join sun2.doc and sunscreen
+sunscreen.numbered <- sunscreen %>% mutate(text = 1:nrow(sunscreen))
+
+sunscreen.sl.rating <- inner_join(sunscreen.numbered, sun2.doc, by = "text") %>% 
+  mutate(nwords = sapply(strsplit(review, " "), length)) %>% 
+  select(helpful, votes, skinType, skinTone,  starts_with("V"), nwords, rating)
+
+
+
+
+# Supervised Learning
+
+
+index<-createDataPartition(sunscreen.sl.rating$rating,p=0.75,list=F)
+Train_Features <- data.matrix(sunscreen.sl.rating[index,-ncol(sunscreen.sl.rating)])
+Train_Labels <- sunscreen.sl.rating[index,ncol(sunscreen.sl.rating)]
+Test_Features <- data.matrix(sunscreen.sl.rating[-index,-ncol(sunscreen.sl.rating)])
+Test_Labels <- sunscreen.sl.rating[-index,ncol(sunscreen.sl.rating)]
+
+to_categorical(Train_Labels)[,c(-1)] -> Train_Labels
+to_categorical(Test_Labels)[,c(-1)] -> Test_Labels
+
+# 
+# Train_Features <- as.matrix(apply(Train_Features, 2, function(x) (x-min(x))/(max(x) - min(x)))) 
+# Test_Features <- as.matrix(apply(Test_Features, 2, function(x) (x-min(x))/(max(x) - min(x))))
+# 
+
+
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units= 106, activation = "relu",input_shape = ncol(Train_Features)) %>%
+  layer_dense(units = 50, activation = "relu") %>%
+  layer_dense(units = 30, activation = "relu") %>%
+  layer_dense(units = 10, activation = "relu") %>%
+  layer_dense(units = 5, activation = "softmax")
+
+
+model %>% compile(loss = "categorical_crossentropy",
+                  optimizer = 'adam',
+                  metrics = c('accuracy'))
+history <-
+  model %>% keras::fit(
+    Train_Features,
+    Train_Labels,
+    validation_split = 0.15,
+    epochs = 500,
+    batch_size = 100,
+    shuffle = T
+  )
+
+
+score <- model %>% evaluate(Test_Features, Test_Labels, batch_size = 25)
+
+# Print the loss and accuracy metrics
+print(score)
+summary(model)
+
+
 
