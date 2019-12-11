@@ -31,7 +31,7 @@ dtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 ## dtotal -- corpus
 library(tm)
-dtotal.tib <- tibble(text=dtotal$comment, doc=c(1:1549))
+dtotal.tib <- tibble(text=dtotal$comment, doc=c(1:nrow(dtotal)))
 dtot.tok <- dtotal.tib%>% unnest_tokens(word, text, to_lower=TRUE) %>%count(doc, word, sort=TRUE) %>% ungroup()
 dtot.cp <- VCorpus(VectorSource(dtot.tok$word))
 dtot.cp <- tm_map(dtot.cp, removeWords, stopwords("english"))
@@ -131,7 +131,7 @@ dtotal.rev <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 #Copié-collé de plus haut...
 dd <- dtotal.rev %>%
   select(num_comments, comment) %>% 
-  mutate(doc=c(1:1549))
+  mutate(doc=c(1:nrow(dtotal)))
 dd <- left_join(dd,reviews)
 dd.tok <- dd %>% 
   unnest_tokens(word, comment, to_lower=TRUE)
@@ -272,15 +272,10 @@ dtot.tok.sent <- dtot.tok %>% right_join(get_sentiments("bing"))
 
 df.feat <- left_join(df.feat, dtot.tok.sent, by=c("rownames.tmod.features."="word"))
 
-ggplot(df.feat, aes(x=dim1, y=dim2, col=sentiment.y)) +
+ggplot(df.feat, aes(x=dim1, y=dim2, col=sentiment)) +
   geom_point() + 
   geom_text(label=rownames(df.feat))+
   ggtitle("Association of the words to dim1 and dim2 - lexicon bing")
-
-ggplot(df.feat, aes(x=dim1, y=dim2, col=sentiment.x)) +
-  geom_point() + 
-  geom_text(label=rownames(df.feat))+
-  ggtitle("Association of the words to dim1 and dim2 - lexicon nrc")# pas terrible
 
 ### mettre en couleur les mots positifs et négatifs -- see above
 
@@ -540,3 +535,4 @@ brands.sentiment.brand <- brands.sentiment.doc %>%
 
 ggplot(brands.sentiment.brand, aes(x = word, y = nnn, fill=sentiment))+
   geom_bar(stat="identity") + ggtitle("Sentiment associated per brand")
+
