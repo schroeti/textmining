@@ -32,7 +32,7 @@ sunscreen <-
 #preformating of the database
 
 ##lowercase
-sunscreen$review<-sunscreen$review%>%tolower()
+sunscreen$review<-sunscreen$review%>%tolower() 
 ##factors
 sunscreen[c(2:5,7:8,14, 16:23)] <- lapply(sunscreen[c(2:5,7:8,14, 16:23)], factor)
 ##renaming the levels
