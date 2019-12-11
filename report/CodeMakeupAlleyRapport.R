@@ -24,7 +24,7 @@ library(wordcloud)
 
 
 #Loading the data set. Make sure you are in the right working repository 
-setwd("data")
+setwd("../data")
 sunscreen <-
   list.files(pattern = "*.csv") %>%
   map_df(~read_csv(.)) 
@@ -640,9 +640,9 @@ Test_Labels <- keras.dum[-index_b,]
 
 model <- keras_model_sequential()
 model %>%
-  layer_dense(units = 60, activation = "relu") %>%
-  layer_dense(units = 40, activation = "relu") %>%
-  layer_dense(units = 200, activation = "relu") %>%
+  layer_dense(units = 38, activation = "relu") %>%
+  layer_dense(units = 20, activation = "relu") %>%
+  layer_dense(units = 15, activation = "relu") %>%
   layer_dense(units = 7, activation = "softmax")
 
 
