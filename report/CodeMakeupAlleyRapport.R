@@ -76,7 +76,7 @@ sunscreen$brandName<-tolower(sunscreen$brandName)
 sunscreen$productName<-tolower(sunscreen$productName)
 
 #We put as stopwords common english words as well as the names of the brands and products 
-my_stop_words <- c(word = c("#", "s", "ve", "re", "skin", "sunscreen", "product","spf", brands, productnames, "shield",
+my_stop_words <- c(word = c("#", "s", "ve", "re", "skin", "sunscreen", "product","spf",
                             "sunscreen","sunscreens","t","it","It","use"), c(stopwords::stopwords("en")))%>%as_tibble()
 my_stop_words$word<-my_stop_words$value
 
