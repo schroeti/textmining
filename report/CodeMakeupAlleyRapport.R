@@ -34,7 +34,7 @@ get_sunsentiments <- function(lexicon = c("sunscReen")) {
 
 
 lexicon_sunscReen <- function() {
-  readRDS("../data/sunscReen.rds")
+  readRDS("../data/sunscReen.rds") 
 }
 
 #Loading the data set. Make sure you are in the right working repository 
