@@ -21,7 +21,18 @@ library(tidyverse)
 library(topicmodels)
 library(wordcloud)
 
+##########Sentiments:
 
+get_sunsentiments <- function(lexicon = c("sunscReen")) {
+  lexicon <- match.arg(lexicon)
+  
+  sunscReen = lexicon_sunscReen()
+}
+
+
+lexicon_sunscReen <- function() {
+  readRDS("../data/sunscReen.rds")
+}
 
 #Loading the data set. Make sure you are in the right working repository 
 setwd("../data")
