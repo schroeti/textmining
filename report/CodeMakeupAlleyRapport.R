@@ -6,6 +6,7 @@ library(ggwordcloud)
 library(kableExtra)
 library(keras)
 library(lexicon)
+library(magrittr)
 library(purrr)
 library(quanteda)
 library(RColorBrewer)
@@ -14,12 +15,14 @@ library(RSentiment)
 library(rword2vec)
 library(sentimentr)
 library(sunscReen)
+library(textdata)
 library(textstem)
 library(text2vec)
 library(tidytext)
 library(tidyverse)
 library(topicmodels)
 library(wordcloud)
+
 
 ##########Sentiments:
 
