@@ -269,36 +269,36 @@ sentiment_normalized_perbrand_product<-sentiment_by_brand_product.2%>%
 
 
 plot_sentiment_page_product.2 <- function(p){
-  ggplot(sentiment_by_brand_product.2, aes(x = sentiment, y = n, fill = sentiment)) +
+  ggplot(sentiment_by_brand_product.2, aes(x = reorder(productName, -n), y = n, fill = sentiment)) +
     geom_bar(stat = "identity") +
-    ggforce::facet_wrap_paginate(facets = ~ productName, nrow = 3, ncol = 3, page = p) +
+    ggforce::facet_wrap_paginate(facets = ~ sentiment, nrow = 3, ncol = 3, page = p) +
     theme_bw()+
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "", y = "Number of words", fill = "Sentiment")
 }
 
 plot_sentiment_pagenormalized_product.2 <- function(p){
-  ggplot(sentiment_normalized_perbrand_product, aes(x = sentiment, y = norm, fill = sentiment)) +
+  ggplot(sentiment_normalized_perbrand_product, aes(x = reorder(productName, -n), y = norm, fill = sentiment)) +
     geom_bar(stat = "identity") +
-    ggforce::facet_wrap_paginate(facets = ~ productName, nrow = 3, ncol = 3, page = p) +
+    ggforce::facet_wrap_paginate(facets = ~ sentiment, nrow = 3, ncol = 3, page = p) +
     theme_bw()+
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "", y = "Number of words", fill = "Sentiment")
 }
 
 plot_sentiment_page_sun_product <- function(p){
-  ggplot(sentiment_by_brand_sun_product, aes(x = sentiment, y = n, fill = sentiment)) +
+  ggplot(sentiment_by_brand_sun_product, aes(x = reorder(productName, -n), y = n, fill = sentiment)) +
     geom_bar(stat = "identity") +
-    ggforce::facet_wrap_paginate(facets = ~ productName, nrow = 3, ncol = 3, page = p) +
+    ggforce::facet_wrap_paginate(facets = ~ sentiment, nrow = 3, ncol = 3, page = p) +
     theme_bw()+
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "", y = "Number of words", fill = "Sentiment")
 }
 
 plot_sentiment_pagenormalized_sun_product<- function(p){
-  ggplot(sentiment_normalized_perbrand_sun_product, aes(x = sentiment, y = norm, fill = sentiment)) +
+  ggplot(sentiment_normalized_perbrand_sun_product, aes(x = reorder(productName, -n), y = norm, fill = sentiment)) +
     geom_bar(stat = "identity") +
-    ggforce::facet_wrap_paginate(facets = ~ productName, nrow = 3, ncol = 3, page = p) +
+    ggforce::facet_wrap_paginate(facets = ~ sentiment, nrow = 3, ncol = 3, page = p) +
     theme_bw()+
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(x = "", y = "Number of words", fill = "Sentiment")
