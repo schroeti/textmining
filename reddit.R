@@ -355,7 +355,7 @@ ggplot(data=brands, aes(x=word, y=n)) +
 ggplot(data=brands, aes(x=word,y=doc)) + geom_tile(aes(fill=n))+
   ggtitle("Appearance of brands in comments")
 
-#Number of time a brand appears in a review
+#Number of time a brand appears in a review - which brand appears in which review
 brands <- brands %>% 
   group_by(review, word) %>% 
   mutate(n_rev = sum(n)) %>% 
