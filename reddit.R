@@ -1,4 +1,4 @@
-#------------------- --------Code for the REDDIT analysis
+#----------------------------Code for the REDDIT analysis
 
 ##Libraries
 install.packages("RedditExtractoR")
@@ -26,13 +26,13 @@ d1 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/cr
 d2 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/btx79r/sun_care_dermatologist_told_me_to_ditch_sunscreen/")
 d3 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/c7x8ke/product_question_30_minutes_after_applying/")
 d4 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/c096h9/review_me_6_months_ago_sunscreen_is_so_greasy_and/")
-d5 <- reddit_content((URL="https://www.reddit.com/r/SkincareAddiction/comments/dmif3o/review_2_skinceutical_sunscreens_and_2_elta_md/"))
+d5 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/dmif3o/review_2_skinceutical_sunscreens_and_2_elta_md/")
 d6 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/dcern5/review_the_10_sunscreens_ive_tried_in_my_hg/")
 d7 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/dkppo4/sun_care_european_high_uva_sunscreens_for/")
 d8 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/d5x4g0/11_sunscreens_for_sensitive_skin_at_low_price/")
 d9 <- reddit_content(URL="https://www.reddit.com/r/SkincareAddiction/comments/df7l2i/review_barisun_50_uvauvb_and_anessa_50_pa/")
 
-##Creation of a dataframe containing all databases
+##Creation of a dataframe containing all databases, adding a column "doc" and a column indicating the review
 dtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 ##Pretreatment - tokenization, removing stopwords, creation of a corpus
@@ -57,6 +57,19 @@ lemmatize_words(dtot.cp, dictionary=hash_lemmas)
 
 ##Document term matrix
 dtot.dtm <- DocumentTermMatrix(dtot.cp)
+
+#TF-IDF
+dtot.tfidf <- bind_tf_idf(dtot.tok, word, doc, n)
+dtot.tfidf
+
+tfidf <- dtot.tfidf %>% 
+  select(word,tf_idf) %>% 
+  group_by(word) %>% 
+  mutate(tfidf = mean(tf_idf)) %>% 
+  select(word,tfidf) %>% 
+  group_by(word,tfidf) %>% 
+  na.omit() %>% 
+  summarise()
 
 #Frequencies and plot of frequencies for the total database
 dtot.fr <- colSums(as.matrix(dtot.dtm))
@@ -103,7 +116,9 @@ dd.tok <- data %>%
 
 dd.cp <- VCorpus(VectorSource(dd.tok$word))
 dd.cp <- tm_map(dd.cp, removeWords, stopwords("english"))
-dd.cp <- tm_map(dd.cp, removeWords, c("m","s","t","skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
+dd.cp <- tm_map(dd.cp, removeWords,
+                c("m","s","t","skin", "sunscreen", "sunscreens", "like", "get", 
+                  "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
 #document term matrix
 dd.dtm <- DocumentTermMatrix(dd.cp)
 #Frequencies + plot
@@ -142,7 +157,10 @@ plot_grid(freq1,freq2,freq3,freq4,freq5,freq6,freq7,freq8,freq9, labels=c("1","2
 
 ##LSA with the quanteda package
 dtot.cp2 <- corpus(dtotal$comment)
-dfmat <- dfm(dtot.cp2, tolower = TRUE, remove = c(stopwords("english"), c("m","s","t","skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https")), stem = FALSE, remove_punct = TRUE)
+dfmat <- dfm(dtot.cp2, tolower = TRUE, 
+             remove = c(stopwords("english"), 
+                        c("m","s","t","skin", "sunscreen", "sunscreens", "like", 
+                          "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https")), stem = FALSE, remove_punct = TRUE)
 tmod <- textmodel_lsa(dfmat, nd=5) #we chose 5 nodes
 head(tmod$docs)
 head(tmod$features)
@@ -153,7 +171,8 @@ rownames(df.doc) <- rownames(tmod$docs)
 ggplot(df.doc, aes(x=dim1, y=dim2)) +
   geom_point() + 
   geom_text(label=rownames(df.doc)) +
-  ggtitle("Association of the comments to dimension 1 and dimension 2")+labs(x="Dimension 1", y="Dimension 2")
+  ggtitle("Association of the comments to dimension 1 and dimension 2")+
+  labs(x="Dimension 1", y="Dimension 2")
 
 ##Plot of the terms (words) and dimension 1 and 2
 df.feat <- data.frame(dim1=tmod$features[,1], dim2=tmod$features[,2], rownames(tmod$features))
@@ -165,7 +184,8 @@ df.feat <- left_join(df.feat, dtot.tok.sent, by=c("rownames.tmod.features."="wor
 ggplot(df.feat, aes(x=dim1, y=dim2, col=sentiment)) +
   geom_point() + 
   geom_text(label=df.feat$rownames.tmod.features.) +
-  ggtitle("Association of the words to dimension 1 and dimension 2")+labs(x="Dimension 1", y="Dimension 2")
+  ggtitle("Association of the words to dimension 1 and dimension 2")+
+  labs(x="Dimension 1", y="Dimension 2")
 
 
 ##Low rank matrix calculations
@@ -302,7 +322,7 @@ paula.choice <- dtot.tok %>%
 
 australian.god <- dtot.tok %>% 
   filter(word=="australian god")
-#None found
+#None found either
 
 roche.posay <- dtot.tok %>% 
   filter(word=="posay")
@@ -314,61 +334,36 @@ clinique <- dtot.tok %>%
 brands <- rbind(neutrogena,biore,cerave,clinique, roche.posay, australian.god)
 brands
 
+#We create a column indicating the review number
+reviews <- data.frame(num_comments = c(d1[1,]$num_comments,d2[1,]$num_comments,d3[1,]$num_comments,d4[1,]$num_comments,
+                                       d5[1,]$num_comments,d6[1,]$num_comments,d7[1,]$num_comments,d8[1,]$num_comments,d9[1,]$num_comments),
+                      review = c(1,2,3,4,5,6,7,8,9))
+
+dtotal <- dtotal %>% 
+  mutate(doc=1:nrow(dtotal))
+
+brands <- left_join(brands, dtotal)
+brands <- left_join(brands,reviews)
 brands$doc <- as.factor(brands$doc)
 
+#plot of the appearance of brands in reviews
 ggplot(data=brands, aes(x=word, y=n)) +
   geom_bar(stat="identity") + labs(x="Brand", y="Number of times") + 
   ggtitle("Appearance of brands' names in reviews")
 
-#Brands/comments
+#Plot of the appearance of brands in comments
 ggplot(data=brands, aes(x=word,y=doc)) + geom_tile(aes(fill=n))+
   ggtitle("Appearance of brands in comments")
 
-#Brands/Review(doc)
-dd$doc <- as.factor(dd$doc)
-brands <- left_join(brands, dd)
-
+#Number of time a brand appears in a review
 brands <- brands %>% 
   group_by(review, word) %>% 
   mutate(n_rev = sum(n)) %>% 
   ungroup()
 
-#Number of time a brand appears in a review
 ggplot(data=brands, aes(x=word,y=review)) + geom_tile(aes(fill=n_rev))+
   ggtitle("Appearance of brands in reviews") + scale_y_continuous(breaks=c(1,2,3,4,5,6,7,8,9)) +
   scale_fill_gradient(low="gray", high="red") + labs(x="Brand", y="Reviews")
-
-#TF-IDF
-dtot.top10 <- top_n(dtot.df, n=10)
-top10 <- unique(dtot.top10$word)
-token10 <- left_join(dtot.top10, dtot.tok)
-
-dtot.tfidf <- bind_tf_idf(token10, word, doc, n)
-dtot.tfidf
-
-tfidf <- dtot.tfidf %>% 
-  select(word,tf_idf) %>% 
-  group_by(word) %>% 
-  mutate(tfidf = mean(tf_idf)) %>% 
-  select(word,tfidf) %>% 
-  group_by(word,tfidf) %>% 
-  na.omit() %>% 
-  summarise()
-
-#contexte (summer/winter)
-summer <- dtot.tok %>% 
-  filter(word=="summer")
-
-winter <- dtot.tok %>% 
-  filter(word=="winter")
-
-season <- rbind(winter,summer)
-
-season <- left_join(season, dtotal.tib, by="doc")
-season
-#on a regardé les commentaires de facon nominal et lorsque winter est indiqué dans les commentaires c'est pour dire qu'ils n'utilisent pas de creme solaire en hiver
-#australie / snow-skiing / renseignements
-
 
 #sentiment analysis of brands
 brands.tib <- tibble(text=brands$comment, doc=c(1:nrow(brands)))
@@ -384,11 +379,13 @@ brands.sentiment.doc <- brands.sentiment.sunscReen %>%
 
 brands.sentiment.doc <- left_join(brands.sentiment.doc,brands.tib, by="doc") 
 brands.sentiment.doc <- left_join(brands.sentiment.doc, brands, by=c("text"="comment"))
-colnames(brands.sentiment.doc)[colnames(brands.sentiment.doc)=="max(sentiment)"] <- "sentiment"
 
 brands.sentiment.brand <- brands.sentiment.doc %>% 
   group_by(word) %>% 
   count(sentiment)
 
 ggplot(brands.sentiment.brand, aes(x = word, y = nnn, fill=sentiment))+
-  geom_bar(stat="identity") + ggtitle("Sentiment associated per brand - lexicon sunscReen") + labs(x="Brand", y="Frequency")
+  geom_bar(stat="identity") + 
+  ggtitle("Sentiment associated per brand - lexicon sunscReen") + 
+  labs(x="Brand", y="Frequency")
+
