@@ -37,10 +37,18 @@ dtotal <- rbind(d1,d2,d3,d4,d5,d6,d7,d8,d9)
 
 ##Pretreatment - tokenization, removing stopwords, creation of a corpus
 dtotal.tib <- tibble(text=dtotal$comment, doc=c(1:nrow(dtotal)))
-dtot.tok <- dtotal.tib%>% unnest_tokens(word, text, to_lower=TRUE) %>%count(doc, word, sort=TRUE) %>% ungroup()
+
+dtot.tok <- dtotal.tib%>% 
+  unnest_tokens(word, text, to_lower=TRUE) %>%
+  count(doc, word, sort=TRUE) %>% 
+  ungroup()
+
 dtot.cp <- VCorpus(VectorSource(dtot.tok$word))
 dtot.cp <- tm_map(dtot.cp, removeWords, stopwords("english"))
-dtot.cp <- tm_map(dtot.cp, removeWords, c("m","s","t","skin", "sunscreen", "sunscreens", "like", "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
+dtot.cp <- tm_map(dtot.cp, 
+                  removeWords,
+                  c("m","s","t","skin", "sunscreen", "sunscreens", "like", 
+                    "get", "one", "just","can", "really", "skincareaddiction", "www.reddit.com","https"))
 inspect(dtot.cp)
 
 ##Stemming and lemmatization
@@ -53,13 +61,17 @@ dtot.dtm <- DocumentTermMatrix(dtot.cp)
 #Frequencies and plot of frequencies for the total database
 dtot.fr <- colSums(as.matrix(dtot.dtm))
 dtot.df <- data.frame(word=names(dtot.fr), freq=dtot.fr)
-ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Frequency of the most seen words in all reviews")+ labs(x="", y="Frequency")
+ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq))+
+  geom_col()+
+  xlab(NULL)+
+  coord_flip()+
+  ggtitle("Frequency of the most seen words in all reviews")+
+  labs(x="", y="Frequency")
 
 #----------------------------Sentiment Analysis
 
 get_sunsentiments <- function(lexicon = c("sunscReen")) {
   lexicon <- match.arg(lexicon)
-  
   sunscReen = lexicon_sunscReen()
 }
 
@@ -73,7 +85,10 @@ dtot.sentiment.sunscReen <- dtot.tok %>%
   count(sentiment)
 
 ##Plot of the sentiment in the total database using the sunscReen lexicon
-ggplot(dtot.sentiment.sunscReen, aes(sentiment,nn)) + geom_bar(alpha=0.5, stat="identity", show.legend=F) + ggtitle("Sentiment using the sunscReen lexicon") + labs(x="Sentiment", y="Frequency")
+ggplot(dtot.sentiment.sunscReen, aes(sentiment,nn)) +
+  geom_bar(alpha=0.5, stat="identity", show.legend=F) +
+  ggtitle("Sentiment using the sunscReen lexicon") +
+  labs(x="Sentiment", y="Frequency")
 
 ##Polarity score
 dtotal.pol <- sentiment_by(dtotal$comment)
