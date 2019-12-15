@@ -9,6 +9,7 @@ library(lexicon)
 library(magrittr)
 library(purrr)
 library(quanteda)
+library(randomForest)
 library(RColorBrewer)
 library(readr)
 library(RSentiment)
@@ -118,7 +119,7 @@ tfidf_product<-tf_byproduct%>%
 #tfidf maximum would be : 
 
 
-#Sentiments wuth valence shifters
+#Sentiments with valence shifters
 
 for (i in c(1:length(sunscreen$review))){
   sunscreen$sentiments[i]<-sentiment_by(sunscreen$review[i],
@@ -460,14 +461,19 @@ pca <- prcomp(sunscreen.glove[top50,])
 plot(pca$x[,1:2], col='white')
 text(pca$x[,1:2], labels = rownames(pca$x))
 
+
+
+#Extract GloVe components
 word_vectors <- glove$components
 
+#Create matrix out of GloVe components
 sun2.doc <- matrix(nr=nrow(word_vectors), nc=length(sunscreen_corpus))
 colnames(sun2.doc) <- names(sunscreen_corpus)
 for (i in 1:length(sunscreen_corpus)){
   sun2.doc[,i] <- apply(word_vectors[,sunscreen_corpus[[i]], drop = F], 1, mean)
 }
 
+#Turn matrix into dataframe
 sun2.doc <- as.matrix(sun2.doc)
 
 sun2.doc <- t(sun2.doc)
@@ -509,135 +515,56 @@ saveRDS(sentiment_per_text, file="../data/sentiment_per_text.RData")
 
 
 
-# Join sun2.doc and sunscreen
+#Define brand vector
 
 brands <- c("australian", "biore", "bioré", "cerave", "clinique", "roche", "posay", "neutrogena", "paula")
 
+#Create empty matrix
+brands_dummy <- data.frame(matrix(NA, nrow = nrow(sunscreen), ncol = length(brands)))
 
-brands_dummy <- data.frame(matrix(NA, nrow = nrow(sunscreen.numbered), ncol = length(brands)))
 
+#Fill empty matrix with dummies
 for(i in 1:length(brands)){
-  brands_dummy[,i] <- ifelse(str_detect(sunscreen.numbered$review, brands[i]),1,0)
+  brands_dummy[,i] <- ifelse(str_detect(sunscreen$review, brands[i]),1,0)
   names(brands_dummy)[i] <- paste("d_", brands[i])
 }
 
+#Add dummy matrix to sunscreen dataframe and number texts
 sunscreen.numbered <- sunscreen %>% cbind(brands_dummy) %>%  mutate(text = 1:nrow(sunscreen))  
 
 
-
-
+#Rename LDA results matrix
 mlda.numbered <- mlda %>% as.data.frame() %>%  mutate(text = 1:nrow(mlda)) %>% 
   rename_at(vars(starts_with("V")), 
             funs(str_replace(., "V", "G")))
 
+#Join GloVe components matrix and LDA results matrix
 sun2.mlda <- inner_join(sun2.doc, mlda.numbered, by = "text")
 
 
-
-sunscreen.sl.rating <- inner_join(sunscreen.numbered, sun2.mlda, by = "text") %>%
-  mutate(nwords = sapply(strsplit(review, " "), length)) %>%
-  select(helpful, reviewId, votes, skinType, skinTone, brandId, starts_with("V"),starts_with("G"), starts_with("d_"),nwords, rating) %>%
-  mutate(rating = as.factor(rating))
-
-sunscreen.sl.rating <- inner_join(sentiment_per_text,sunscreen.sl.rating, by = "reviewId") %>%
-  select(-reviewId)
-
-
+#Join susncreen numbered matrix with sun2.mlda matrix and rename columns
 sunscreen.sl.brand <- inner_join(sunscreen.numbered, sun2.mlda, by = "text") %>% 
   mutate(nwords = sapply(strsplit(review, " "), length)) %>% 
-  select(reviewId, sentiments,  starts_with("V"),starts_with("G"),starts_with("d_"),nwords, brandId) %>% 
+  select(reviewId, starts_with("V"),starts_with("G"),starts_with("d_"),nwords, brandId) %>% 
   mutate(brandId = as.factor(brandId))
 
+
+#Join sunscreen.sl.brand matrix with sentiment analysis matrix
 sunscreen.sl.brand <- inner_join(sentiment_per_text,sunscreen.sl.brand, by = "reviewId") %>% 
   select(-reviewId) 
 
 
-# 
-# #############################################################
-# # SUPERVISED LEARNING
-# # Predict brand
-# 
-# ggplot(sunscreen.sl.rating, aes(x = rating)) +
-#  geom_histogram(stat = "count")
-# 
-# 
-# # Keras
-# 
-# 
-# index<-createDataPartition(sunscreen.sl.rating$rating,p=0.75,list=F)
-# Train_Features <- data.matrix(sunscreen.sl.rating[index,-ncol(sunscreen.sl.rating)])
-# Train_Labels <- sunscreen.sl.rating[index,ncol(sunscreen.sl.rating)]
-# Test_Features <- data.matrix(sunscreen.sl.rating[-index,-ncol(sunscreen.sl.rating)])
-# Test_Labels <- sunscreen.sl.rating[-index,ncol(sunscreen.sl.rating)]
-# 
-# to_categorical(Train_Labels)[,c(-1)] -> Train_Labels
-# to_categorical(Test_Labels)[,c(-1)] -> Test_Labels
-# 
-# # 
-# # Train_Features <- as.matrix(apply(Train_Features, 2, function(x) (x-min(x))/(max(x) - min(x)))) 
-# # Test_Features <- as.matrix(apply(Test_Features, 2, function(x) (x-min(x))/(max(x) - min(x))))
-# # 
-# 
-# 
-# model <- keras_model_sequential()
-# model %>%
-#   layer_dense(units= 106, activation = "relu",input_shape = ncol(Train_Features)) %>%
-#   layer_dense(units = 50, activation = "relu") %>%
-#   layer_dense(units = 30, activation = "relu") %>%
-#   layer_dense(units = 10, activation = "relu") %>%
-#   layer_dense(units = 5, activation = "softmax")
-# 
-# 
-# model %>% compile(loss = "categorical_crossentropy",
-#                   optimizer = 'adam',
-#                   metrics = c('accuracy'))
-# history <-
-#   model %>% keras::fit(
-#     Train_Features,
-#     Train_Labels,
-#     validation_split = 0.15,
-#     epochs = 200,
-#     batch_size = 100,
-#     shuffle = T
-#   )
-# 
-# 
-# score <- model %>% evaluate(Test_Features, Test_Labels, batch_size = 25)
-# 
-# # Print the loss and accuracy metrics
-# print(score)
-# summary(model)
-# 
-# 
-# #RF
-# 
-# library(randomForest)
-# index<-createDataPartition(sunscreen.sl.rating$rating,p=0.75,list=F)
-# train.data  <- sunscreen.sl.rating[index,]
-# trainClasses <- sunscreen.sl.rating[index, ncol(train.data)]
-# test.data <- sunscreen.sl.rating[-index, ]  
-# testClasses <- sunscreen.sl.rating[-index, ncol(test.data)]
-# 
-# set.seed(9560)
-# 
-#      
-# 
-# table(up_train$Class)
-# 
-# 
-# 
-# #From the results, we see that 500 trees yield the same result as 3000. Therefore, having Occam's razor in mind, we decide to go for the simpler model. 
-# system.time(rf_500 <- caret::train(Class ~ ., data = up_train, method = "rf", ntree = 500,preProcess = "range"))
-# cm.rf_500 <- confusionMatrix(predict(rf_500, test.data[,-ncol(test.data)]), test.data$rating)
-# print(cm.rf_500)
-# 
-# 
+ 
+#############################################################
+## SUPERVISED LEARNING
 
 ## Brand prediction
-library(randomForest)
 
+
+#Set the seed
 set.seed(1000)
 
+#Create training and testing sets
 index_b<-createDataPartition(sunscreen.sl.brand$brandId,p=0.75,list=F)
 train.data  <- sunscreen.sl.brand[index_b,]
 trainClasses <- sunscreen.sl.brand[index_b, ncol(train.data)]
@@ -645,32 +572,78 @@ test.data <- sunscreen.sl.brand[-index_b, ]
 testClasses <- sunscreen.sl.brand[-index_b, ncol(test.data)]
 
 
+#Define crossvalidation
+tr <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
 
-#From the results, we see that 500 trees yield the same result as 3000. Therefore, having Occam's razor in mind, we decide to go for the simpler model. 
-system.time(rf_500_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 100,preProcess = "range"))
+
+#Random forest (rf) with 100 trees fitting and confusion matrix
+system.time(rf_100_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 100,preProcess = "range", trControl = tr))
+cm.rf_100_brand <- confusionMatrix(predict(rf_100_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_100_brand)
+
+
+#Random forest (rf) with 500 trees fitting and confusion matrix
+system.time(rf_500_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 500,preProcess = "range", trControl = tr))
 cm.rf_500_brand <- confusionMatrix(predict(rf_500_brand, test.data[,-ncol(test.data)]), test.data$brandId)
 print(cm.rf_500_brand)
 
+#Random forest (rf) with 1000 trees fitting and confusion matrix
+system.time(rf_1000_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 1000,preProcess = "range", trControl = tr))
+cm.rf_1000_brand <- confusionMatrix(predict(rf_1000_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_1000_brand)
 
 
+#Random forest (rf) with 1500 trees fitting and confusion matrix
+system.time(rf_1500_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 1500,preProcess = "range", trControl = tr))
+cm.rf_1500_brand <- confusionMatrix(predict(rf_1500_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_1500_brand)
+
+
+#Random forest (rf) with 2000 trees fitting and confusion matrix
+system.time(rf_2000_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 2000,preProcess = "range", trControl = tr))
+cm.rf_2000_brand <- confusionMatrix(predict(rf_2000_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_2000_brand)
+
+
+
+#Create accuracy and kappa boxplots
+resamps <- resamples(list("RF with 100 trees" = rf_100_brand, 
+                          "RF with 500 trees" = rf_500_brand, 
+                          "RF with 1000 trees" = rf_1000_brand, 
+                          "RF with 1500 trees" = rf_1500_brand, 
+                          "RF with 2000 trees" = rf_2000_brand
+                          
+))
+print(resamps)
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+
+bwplot(resamps, layout = c(2, 1))
+
+
+
+
+#Keras model
+
+
+#Create training and testing sets
 Train_Features <- data.matrix(sunscreen.sl.brand[index_b,-ncol(sunscreen.sl.brand)])
 Test_Features <- data.matrix(sunscreen.sl.brand[-index_b,-ncol(sunscreen.sl.brand)])
-keras.dum <- model.matrix(~0+sunscreen.sl.brand$brandId)
 
+#Extract outcome labels
 Train_Labels <- keras.dum[index_b,]
 Test_Labels <- keras.dum[-index_b,]
   
 
-
-# 
-# Train_Features <- as.matrix(apply(Train_Features, 2, function(x) (x-min(x))/(max(x) - min(x)))) 
-# Test_Features <- as.matrix(apply(Test_Features, 2, function(x) (x-min(x))/(max(x) - min(x))))
-# 
-
-
+#Define neural network model
 model <- keras_model_sequential()
 model %>%
-  layer_dense(units = 38, activation = "relu") %>%
+  layer_dense(units = 72, activation = "relu") %>%
+  layer_dense(units = 40, activation = "relu") %>%
   layer_dense(units = 20, activation = "relu") %>%
   layer_dense(units = 15, activation = "relu") %>%
   layer_dense(units = 7, activation = "softmax")
@@ -679,6 +652,8 @@ model %>%
 model %>% compile(loss = "categorical_crossentropy",
                   optimizer = 'rmsprop',
                   metrics = c('accuracy'))
+
+#Fit model
 history <-
   model %>% keras::fit(
     Train_Features,
