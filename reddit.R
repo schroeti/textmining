@@ -98,7 +98,7 @@ dtot.sentiment.sunscReen <- dtot.tok %>%
   count(sentiment)
 
 ##Plot of the sentiment in the total database using the sunscReen lexicon
-ggplot(dtot.sentiment.sunscReen, aes(sentiment,nn)) +
+ggplot(dtot.sentiment.sunscReen, aes(sentiment,nn,fill=sentiment)) +
   geom_bar(alpha=0.5, stat="identity", show.legend=F) +
   ggtitle("Sentiment using the sunscReen lexicon") +
   labs(x="Sentiment", y="Frequency")
@@ -300,9 +300,11 @@ dtotal <- dtotal %>%
   mutate(mois = month(dtotal$comm_date))
 
 #Plot of the posting dates of the comments
-ggplot(data=dtotal, aes(x=mois, y=mois)) +
-  geom_bar(stat="identity") + labs(x="Month", y="Number of comments") + 
-  ggtitle("Comments per month")
+postingmonths <- dtotal %>% select(mois) %>%  group_by(mois) %>% count()
+ggplot(postingmonths, aes(x=mois, y=n, fill=mois)) +
+  geom_bar(stat = "identity") + labs(x="Month", y="Number of comments") + 
+  ggtitle("Comments per month") +
+  theme(legend.position = "none")
 
 #----------------------------Brand Analysis
 
@@ -347,9 +349,10 @@ brands <- left_join(brands,reviews)
 brands$doc <- as.factor(brands$doc)
 
 #plot of the appearance of brands in reviews
-ggplot(data=brands, aes(x=word, y=n)) +
+ggplot(data=brands, aes(x=word, y=n, fill=word)) +
   geom_bar(stat="identity") + labs(x="Brand", y="Number of times") + 
-  ggtitle("Appearance of brands' names in reviews")
+  ggtitle("Appearance of brands' names in reviews") +
+  theme(legend.position = "none")
 
 #Plot of the appearance of brands in comments
 ggplot(data=brands, aes(x=word,y=doc)) + geom_tile(aes(fill=n))+
