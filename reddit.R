@@ -74,12 +74,13 @@ tfidf <- dtot.tfidf %>%
 #Frequencies and plot of frequencies for the total database
 dtot.fr <- colSums(as.matrix(dtot.dtm))
 dtot.df <- data.frame(word=names(dtot.fr), freq=dtot.fr)
-ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq))+
+ggplot(top_n(dtot.df, n=15), aes(reorder(word,freq),freq, fill=freq))+
   geom_col()+
   xlab(NULL)+
   coord_flip()+
   ggtitle("Frequency of the most seen words in all reviews")+
-  labs(x="", y="Frequency")
+  labs(x="", y="Frequency")+
+  theme(legend.position = "None")
 
 #----------------------------Sentiment Analysis
 
@@ -139,15 +140,15 @@ d8.df <- freq.data(d8)
 d9.df <- freq.data(d9)
 
 #Plots of the most frequent words in each review
-freq1 <- ggplot(top_n(d1.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 1")
-freq2 <- ggplot(top_n(d2.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 2")
-freq3 <- ggplot(top_n(d3.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 3")
-freq4 <- ggplot(top_n(d4.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 4")
-freq5 <- ggplot(top_n(d5.df, n=4), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 5")
-freq6 <- ggplot(top_n(d6.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 6")
-freq7 <- ggplot(top_n(d7.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 7")
-freq8 <- ggplot(top_n(d8.df, n=10), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 8")
-freq9 <- ggplot(top_n(d9.df, n=9), aes(reorder(word,freq),freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 9")
+freq1 <- ggplot(top_n(d1.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 1")+theme(legend.position = "None")
+freq2 <- ggplot(top_n(d2.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 2")+theme(legend.position = "None")
+freq3 <- ggplot(top_n(d3.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 3")+theme(legend.position = "None")
+freq4 <- ggplot(top_n(d4.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 4")+theme(legend.position = "None")
+freq5 <- ggplot(top_n(d5.df, n=4), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 5")+theme(legend.position = "None")
+freq6 <- ggplot(top_n(d6.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 6")+theme(legend.position = "None")
+freq7 <- ggplot(top_n(d7.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 7")+theme(legend.position = "None")
+freq8 <- ggplot(top_n(d8.df, n=10), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 8")+theme(legend.position = "None")
+freq9 <- ggplot(top_n(d9.df, n=9), aes(reorder(word,freq),freq, fill=freq))+geom_col()+xlab(NULL)+coord_flip()+ggtitle("Review 9")+theme(legend.position = "None")
 
 #Show the plots in the same window
 library(cowplot)
