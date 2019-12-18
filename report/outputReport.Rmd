@@ -257,7 +257,7 @@ page = p
 ) +
 theme_bw() +
 theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-labs(x = "", y = "Number of words", fill = "Sentiment")
+labs(x = "", y = "Frequency", fill = "Sentiment")
 }
 
 plot_sentiment_pagenormalized_sun(1) %>% plot()
@@ -305,7 +305,7 @@ page = p
 ) +
 theme_bw() +
 theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-labs(x = "", y = "Number of words", fill = "Sentiment")
+labs(x = "", y = "Frequency", fill = "Sentiment")
 }
 
 plot_sentiment_pagenormalized_sun_product(1) %>% plot()
@@ -623,6 +623,130 @@ model %>%
 model %>% compile(loss = "categorical_crossentropy",
                   optimizer = 'rmsprop',
                   metrics = c('accuracy'))
+history <-
+  model %>% keras::fit(
+    Train_Features,
+    Train_Labels,
+    validation_split = 0.15,
+    epochs = 200,
+    batch_size = 100,
+    shuffle = T
+  )
+
+
+score <- model %>% evaluate(Test_Features, Test_Labels, batch_size = 25)
+
+# Print the loss and accuracy metrics
+print(score)
+summary(model)
+
+
+
+```
+
+
+
+
+```{r}
+#############################################################
+## SUPERVISED LEARNING
+
+## Brand prediction
+
+
+#Set the seed
+set.seed(1000)
+
+#Create training and testing sets
+index_b<-createDataPartition(sunscreen.sl.brand$brandId,p=0.75,list=F)
+train.data  <- sunscreen.sl.brand[index_b,]
+trainClasses <- sunscreen.sl.brand[index_b, ncol(train.data)]
+test.data <- sunscreen.sl.brand[-index_b, ]  
+testClasses <- sunscreen.sl.brand[-index_b, ncol(test.data)]
+
+
+#Define crossvalidation
+tr <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+
+
+#Random forest (rf) with 100 trees fitting and confusion matrix
+system.time(rf_100_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 100,preProcess = "range", trControl = tr))
+cm.rf_100_brand <- confusionMatrix(predict(rf_100_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_100_brand)
+
+
+#Random forest (rf) with 500 trees fitting and confusion matrix
+system.time(rf_500_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 500,preProcess = "range", trControl = tr))
+cm.rf_500_brand <- confusionMatrix(predict(rf_500_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_500_brand)
+
+#Random forest (rf) with 1000 trees fitting and confusion matrix
+system.time(rf_1000_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 1000,preProcess = "range", trControl = tr))
+cm.rf_1000_brand <- confusionMatrix(predict(rf_1000_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_1000_brand)
+
+
+#Random forest (rf) with 1500 trees fitting and confusion matrix
+system.time(rf_1500_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 1500,preProcess = "range", trControl = tr))
+cm.rf_1500_brand <- confusionMatrix(predict(rf_1500_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_1500_brand)
+
+
+#Random forest (rf) with 2000 trees fitting and confusion matrix
+system.time(rf_2000_brand <- caret::train(brandId ~ ., data = train.data, method = "rf", ntree = 2000,preProcess = "range", trControl = tr))
+cm.rf_2000_brand <- confusionMatrix(predict(rf_2000_brand, test.data[,-ncol(test.data)]), test.data$brandId)
+print(cm.rf_2000_brand)
+
+
+
+#Create accuracy and kappa boxplots
+resamps <- resamples(list("RF with 100 trees" = rf_100_brand, 
+                          "RF with 500 trees" = rf_500_brand, 
+                          "RF with 1000 trees" = rf_1000_brand, 
+                          "RF with 1500 trees" = rf_1500_brand, 
+                          "RF with 2000 trees" = rf_2000_brand
+                          
+))
+print(resamps)
+theme1 <- trellis.par.get()
+theme1$plot.symbol$col = rgb(.2, .2, .2, .4)
+theme1$plot.symbol$pch = 16
+theme1$plot.line$col = rgb(1, 0, 0, .7)
+theme1$plot.line$lwd <- 2
+trellis.par.set(theme1)
+
+bwplot(resamps, layout = c(2, 1))
+
+
+
+
+#Keras model
+
+
+#Create training and testing sets
+Train_Features <- data.matrix(sunscreen.sl.brand[index_b,-ncol(sunscreen.sl.brand)])
+Test_Features <- data.matrix(sunscreen.sl.brand[-index_b,-ncol(sunscreen.sl.brand)])
+
+#Extract outcome labels
+Train_Labels <- keras.dum[index_b,]
+Test_Labels <- keras.dum[-index_b,]
+  
+
+#Define neural network model
+model <- keras_model_sequential()
+model %>%
+  layer_dense(units = 72, activation = "relu") %>%
+  layer_dense(units = 40, activation = "relu") %>%
+  layer_dense(units = 20, activation = "relu") %>%
+  layer_dense(units = 15, activation = "relu") %>%
+  layer_dense(units = 7, activation = "softmax")
+
+
+model %>% compile(loss = "categorical_crossentropy",
+                  optimizer = 'rmsprop',
+                  metrics = c('accuracy'))
+
+#Fit model
 history <-
   model %>% keras::fit(
     Train_Features,
