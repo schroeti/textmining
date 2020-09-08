@@ -1,4 +1,4 @@
-# Group D proje
+# Group D project
 This is a repository for the Text Mining course project. 
 
 # Group D project: Analysis of sunscreen reviews using text mining methods
