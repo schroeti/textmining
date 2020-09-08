@@ -1,10 +1,8 @@
-# Group D project
-This is a repository for the Text Mining course project. 
 
 # Group D project: Analysis of sunscreen reviews using text mining methods
 ## Authors: Charlotte Fleury, Rita Sefraoui Tahiri, Astrid Wiedmer & Alexandre Schroeter
 ## Presented to the text mining course (Fall 19) taught by Dr. Marc-Olivier Boldi
-Welcome on our repo for the project of Text Mining where we try to apply text mining techniques on sunscreen reviews from the website [makeupalley](https://www.makeupalley.com/) and from [reddit](https://www.reddit.com/).
+Welcome on our repository for a project of text mining where we try to apply text mining techniques on sunscreen reviews from the website [makeupalley](https://www.makeupalley.com/) and from [reddit](https://www.reddit.com/).
 
 ## Objective
 This report has made focused on a binary classification task to identify healthy individuals from those infected by COVID-19, and also a multi-class classification where the task is to identify COVID19+ from healthy individuals or those infected with viral and bacterial pneumonia.
