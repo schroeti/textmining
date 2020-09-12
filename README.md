@@ -14,6 +14,4 @@ This folder contains the scrapped reviews of 12 different brands of sunscreen fr
 ### Report
 This folder contains different scripts used for the creation of the report on the homepage. It includes preprocessing the data (text cleaning), performing sentiment analyses, identifying similarities within corpuses, word embedding and using supervised learning to predict the brand associated with a specific review.
 
-You can download our report here:
-
-<a href="https://schroeti.github.io/textmining/GroupDTextMiningReport.pdf" target="_blank">PDF.</a>
+You can download our pdf report <a href="https://schroeti.github.io/textmining/GroupDTextMiningReport.pdf" target="_blank">here.</a>
