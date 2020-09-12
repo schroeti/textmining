@@ -7,7 +7,7 @@ Welcome on our repository for a project of text mining where we try to apply tex
 ## Objective
 This report has made focused on a binary classification task to identify healthy individuals from those infected by COVID-19, and also a multi-class classification where the task is to identify COVID19+ from healthy individuals or those infected with viral and bacterial pneumonia.
 
-## Structure of the repository
+## Structure of the <a href="https://github.com/schroeti/textmining" target="_blank">repository.</a> 
 ### Data
 This folder contains the scrapped reviews of 12 different brands of sunscreen from MakeUpAlley. 
 
