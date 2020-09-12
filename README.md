@@ -1,4 +1,3 @@
-
 # Group D project: Analysis of sunscreen reviews using text mining methods
 ## Authors: Charlotte Fleury, Rita Sefraoui Tahiri, Astrid Wiedmer & Alexandre Schroeter
 ## Presented to the text mining course (Fall 19) taught by Dr. Marc-Olivier Boldi
